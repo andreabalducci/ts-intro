@@ -51,36 +51,38 @@ module EventStore {
 
 	export class Projection {
 		private handlers: Array<IEventHandler<IEvent>> = new Array<IEventHandler<IEvent>>();
-		protected Register<T extends IEvent>(name: string, handler: IEventHandler<T>) {
+		protected On<T extends IEvent>(name: string, handler: IEventHandler<T>) {
+			
 			console.log('registered handler', name, handler);
 			this.handlers[name] = handler;
 		}
 
-		public On(event: IEvent) {
+		public Handle(event: IEvent) {
 			var name = event.GetType();
 			var handler = this.handlers[name];
 			console.log('handling ', name, handler);
-			handler(event);
+			if(handler)
+				handler(event);
 		}
 	}
 
 	export class AggregateState extends Projection {
 		Apply(event: IEvent): void {
-			this.On(event);
+			this.Handle(event);
 		}
 	}
 
-	export class Aggregate {
-		private events: Array<IEvent> = new Array<IEvent>();
+	export class Aggregate<TState extends AggregateState> {
+		private Events: Array<IEvent> = new Array<IEvent>();
 
-		constructor(protected id:string, protected state: AggregateState) {
+		constructor(protected id:string, protected State: TState) {
 
 		}
 
 		protected RaiseEvent(event: IEvent): void {
 			event.streamId = this.id;
-			this.events.push(event);
-			this.state.Apply(event);
+			this.Events.push(event);
+			this.State.Apply(event);
 			Bus.Default.publish(event);
 		}
 	}
@@ -95,7 +97,7 @@ module EventStore {
 		
 		publish(event :IEvent):void{
 			this.Consumers.forEach(function(consumer:Projection) {
-				consumer.On(event);
+				consumer.Handle(event);
 			}, this);
 		}
 		

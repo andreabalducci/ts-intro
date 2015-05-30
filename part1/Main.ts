@@ -13,8 +13,11 @@ module Program {
 
 		constructor() {
 			super();
+			
+			var createdEvent = Inventory.ItemCreated;
+			console.log("event is ", createdEvent);
 
-			this.Register<Inventory.ItemCreated>(EventStore.getClassName(Inventory.ItemCreated), e => {
+			this.On<Inventory.ItemCreated>(EventStore.getClassName(Inventory.ItemCreated), e => {
 				this.allItems.add(e.streamId, {
 					id: e.id,
 					description: e.description,
@@ -22,7 +25,7 @@ module Program {
 				});
 			});
 
-			this.Register(EventStore.getClassName(Inventory.ItemDisabled), e => {
+			this.On<Inventory.ItemDisabled>(EventStore.getClassName(Inventory.ItemDisabled), e => {
 				this.allItems.getValue(e.streamId).active = false;
 			});
 		}
@@ -41,6 +44,7 @@ module Program {
 
 	var macbook = new Inventory.Item('1');
 	macbook.create('mbp', 'macbook pro');
+	macbook.disable();
 	macbook.disable();
 	
 	var iphone = new Inventory.Item('2');

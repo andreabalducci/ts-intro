@@ -11,13 +11,15 @@ var Inventory;
         __extends(ItemState, _super);
         function ItemState() {
             _super.call(this);
-            this.Register(EventStore.getClassName(ItemCreated), function (e) {
+            this.On(EventStore.getClassName(ItemCreated), function (e) {
                 console.log('Item was actually created', e);
             });
-            this.Register(EventStore.getClassName(ItemDisabled), function (e) {
+            this.On(EventStore.getClassName(ItemDisabled), function (e) {
                 console.log('Item was disabled', e);
             });
         }
+        ItemState.prototype.hasBeenDisabled = function () { return this.disabled; };
+        ;
         return ItemState;
     })(EventStore.AggregateState);
     var Item = (function (_super) {
@@ -29,7 +31,9 @@ var Inventory;
             this.RaiseEvent(new ItemCreated(id, description));
         };
         Item.prototype.disable = function () {
-            this.RaiseEvent(new ItemDisabled());
+            if (!this.State.hasBeenDisabled()) {
+                this.RaiseEvent(new ItemDisabled());
+            }
         };
         return Item;
     })(EventStore.Aggregate);

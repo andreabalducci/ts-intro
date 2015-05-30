@@ -14,14 +14,16 @@ var Program;
             var _this = this;
             _super.call(this);
             this.allItems = new Collections.Dictionary();
-            this.Register(EventStore.getClassName(Inventory.ItemCreated), function (e) {
+            var createdEvent = Inventory.ItemCreated;
+            console.log("event is ", createdEvent);
+            this.On(EventStore.getClassName(Inventory.ItemCreated), function (e) {
                 _this.allItems.add(e.streamId, {
                     id: e.id,
                     description: e.description,
                     active: true
                 });
             });
-            this.Register(EventStore.getClassName(Inventory.ItemDisabled), function (e) {
+            this.On(EventStore.getClassName(Inventory.ItemDisabled), function (e) {
                 _this.allItems.getValue(e.streamId).active = false;
             });
         }
@@ -38,6 +40,7 @@ var Program;
     EventStore.Bus.Default.subscribe(itemsList);
     var macbook = new Inventory.Item('1');
     macbook.create('mbp', 'macbook pro');
+    macbook.disable();
     macbook.disable();
     var iphone = new Inventory.Item('2');
     iphone.create('iphone', 'Iphone 5');

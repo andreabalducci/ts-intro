@@ -34,15 +34,16 @@ var EventStore;
         function Projection() {
             this.handlers = new Array();
         }
-        Projection.prototype.Register = function (name, handler) {
+        Projection.prototype.On = function (name, handler) {
             console.log('registered handler', name, handler);
             this.handlers[name] = handler;
         };
-        Projection.prototype.On = function (event) {
+        Projection.prototype.Handle = function (event) {
             var name = event.GetType();
             var handler = this.handlers[name];
             console.log('handling ', name, handler);
-            handler(event);
+            if (handler)
+                handler(event);
         };
         return Projection;
     })();
@@ -53,21 +54,21 @@ var EventStore;
             _super.apply(this, arguments);
         }
         AggregateState.prototype.Apply = function (event) {
-            this.On(event);
+            this.Handle(event);
         };
         return AggregateState;
     })(Projection);
     EventStore.AggregateState = AggregateState;
     var Aggregate = (function () {
-        function Aggregate(id, state) {
+        function Aggregate(id, State) {
             this.id = id;
-            this.state = state;
-            this.events = new Array();
+            this.State = State;
+            this.Events = new Array();
         }
         Aggregate.prototype.RaiseEvent = function (event) {
             event.streamId = this.id;
-            this.events.push(event);
-            this.state.Apply(event);
+            this.Events.push(event);
+            this.State.Apply(event);
             Bus.Default.publish(event);
         };
         return Aggregate;
@@ -81,7 +82,7 @@ var EventStore;
         };
         Bus.prototype.publish = function (event) {
             this.Consumers.forEach(function (consumer) {
-                consumer.On(event);
+                consumer.Handle(event);
             }, this);
         };
         Bus.prototype.subscribe = function (consumer) {
