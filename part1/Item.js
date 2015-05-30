@@ -11,10 +11,10 @@ var Inventory;
         __extends(ItemState, _super);
         function ItemState() {
             _super.call(this);
-            this.Register(ItemCreated.GetType(), function (e) {
+            this.Register(EventStore.getClassName(ItemCreated), function (e) {
                 console.log('Item was actually created', e);
             });
-            this.Register(ItemDisabled.GetType(), function (e) {
+            this.Register(EventStore.getClassName(ItemDisabled), function (e) {
                 console.log('Item was disabled', e);
             });
         }
@@ -42,9 +42,6 @@ var Inventory;
             this.id = id;
             this.description = description;
         }
-        ItemCreated.GetType = function () {
-            return "ItemCreated";
-        };
         return ItemCreated;
     })(EventStore.Event);
     Inventory.ItemCreated = ItemCreated;
@@ -53,9 +50,6 @@ var Inventory;
         function ItemDisabled() {
             _super.call(this);
         }
-        ItemDisabled.GetType = function () {
-            return "ItemDisabled";
-        };
         return ItemDisabled;
     })(EventStore.Event);
     Inventory.ItemDisabled = ItemDisabled;

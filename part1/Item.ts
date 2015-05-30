@@ -4,11 +4,11 @@ module Inventory {
 		constructor() {
 			super();
 
-			this.Register(ItemCreated.GetType(), e => {
+			this.Register(EventStore.getClassName(ItemCreated), e => {
 				console.log('Item was actually created', e);
 			});
 
-			this.Register(ItemDisabled.GetType(), e=> {
+			this.Register(EventStore.getClassName(ItemDisabled), e=> {
 				console.log('Item was disabled', e);
 			});
 		}
@@ -31,19 +31,12 @@ module Inventory {
 	
 	/* events */
 	export class ItemCreated extends EventStore.Event {
-		static GetType(): string {
-			return "ItemCreated";
-		}
 		constructor(public id: string, public description: string) {
 			super();
 		}
 	}
 
 	export class ItemDisabled extends EventStore.Event {
-		static GetType(): string {
-			return "ItemDisabled";
-		}
-		
 		constructor() {
 			super();
 		}

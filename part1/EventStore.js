@@ -13,6 +13,12 @@ var EventStore;
         return (results && results.length > 1) ? results[1] : "";
     }
     EventStore.getType = getType;
+    function getClassName(o) {
+        var funcNameRegex = /function (.{1,})\(/;
+        var results = (funcNameRegex).exec(o.toString());
+        return (results && results.length > 1) ? results[1] : "";
+    }
+    EventStore.getClassName = getClassName;
     var Event = (function () {
         function Event() {
             this.eventId = "evt_" + Event.EventCounter++;

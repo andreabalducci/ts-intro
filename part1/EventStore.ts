@@ -10,7 +10,7 @@ module EventStore {
 
 	export interface IEvent {
 		eventId: string;
-		GetType() : string;
+		GetType(): string;
 	}
 
 	export interface IEventHandler {
@@ -29,6 +29,12 @@ module EventStore {
         return (results && results.length > 1) ? results[1] : "";
 	}
 
+	export function getClassName(o): string {
+		var funcNameRegex = /function (.{1,})\(/;
+        var results = (funcNameRegex).exec((<any> o).toString());
+        return (results && results.length > 1) ? results[1] : "";
+	}
+
 	export class Event {
 		static EventCounter: number = 0;
 
@@ -36,15 +42,15 @@ module EventStore {
 		constructor() {
 			this.eventId = "evt_" + Event.EventCounter++;
 		}
-		
-		GetType():string{
+
+		GetType(): string {
 			return getType(this);
 		}
 	}
 
 	export class Projection {
 		private handlers: Array<IEventHandler> = new Array<IEventHandler>();
-		protected Register(name:string, handler: IEventHandler){
+		protected Register(name: string, handler: IEventHandler) {
 			console.log('registered handler', name, handler);
 			this.handlers[name] = handler;
 		}
