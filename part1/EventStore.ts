@@ -24,13 +24,13 @@ module EventStore {
 	}
 	
 	/* Implementations */
-	export function getType(o): string {
+	 function getType(o): string {
 		var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec((<any> o).constructor.toString());
         return (results && results.length > 1) ? results[1] : "";
 	}
 
-	export function getClassName(o): string {
+	function getClassName(o): string {
 		var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec((<any> o).toString());
         return (results && results.length > 1) ? results[1] : "";
@@ -51,16 +51,14 @@ module EventStore {
 
 	export class Projection {
 		private handlers: Array<IEventHandler<IEvent>> = new Array<IEventHandler<IEvent>>();
-		protected On<T extends IEvent>(name: string, handler: IEventHandler<T>) {
-			
-			console.log('registered handler', name, handler);
+		protected On<T extends IEvent>(event:T, handler: IEventHandler<T>) {
+			var name = getType(event);
 			this.handlers[name] = handler;
 		}
 
 		public Handle(event: IEvent) {
 			var name = event.GetType();
 			var handler = this.handlers[name];
-			console.log('handling ', name, handler);
 			if(handler)
 				handler(event);
 		}

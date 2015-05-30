@@ -10,12 +10,12 @@ var Inventory;
     var ItemState = (function (_super) {
         __extends(ItemState, _super);
         function ItemState() {
+            var _this = this;
             _super.call(this);
-            this.On(EventStore.getClassName(ItemCreated), function (e) {
-                console.log('Item was actually created', e);
+            this.On(ItemCreated.Type, function (e) {
             });
-            this.On(EventStore.getClassName(ItemDisabled), function (e) {
-                console.log('Item was disabled', e);
+            this.On(ItemDisabled.Type, function (e) {
+                _this.disabled = true;
             });
         }
         ItemState.prototype.hasBeenDisabled = function () { return this.disabled; };
@@ -27,7 +27,7 @@ var Inventory;
         function Item(id) {
             _super.call(this, id, new ItemState());
         }
-        Item.prototype.create = function (id, description) {
+        Item.prototype.register = function (id, description) {
             this.RaiseEvent(new ItemCreated(id, description));
         };
         Item.prototype.disable = function () {
@@ -46,6 +46,7 @@ var Inventory;
             this.id = id;
             this.description = description;
         }
+        ItemCreated.Type = new ItemCreated(null, null);
         return ItemCreated;
     })(EventStore.Event);
     Inventory.ItemCreated = ItemCreated;
@@ -54,6 +55,7 @@ var Inventory;
         function ItemDisabled() {
             _super.call(this);
         }
+        ItemDisabled.Type = new ItemDisabled();
         return ItemDisabled;
     })(EventStore.Event);
     Inventory.ItemDisabled = ItemDisabled;

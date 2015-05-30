@@ -14,16 +14,14 @@ var Program;
             var _this = this;
             _super.call(this);
             this.allItems = new Collections.Dictionary();
-            var createdEvent = Inventory.ItemCreated;
-            console.log("event is ", createdEvent);
-            this.On(EventStore.getClassName(Inventory.ItemCreated), function (e) {
+            this.On(Inventory.ItemCreated.Type, function (e) {
                 _this.allItems.add(e.streamId, {
                     id: e.id,
                     description: e.description,
                     active: true
                 });
             });
-            this.On(EventStore.getClassName(Inventory.ItemDisabled), function (e) {
+            this.On(Inventory.ItemDisabled.Type, function (e) {
                 _this.allItems.getValue(e.streamId).active = false;
             });
         }
@@ -39,11 +37,11 @@ var Program;
     var itemsList = new ItemsList();
     EventStore.Bus.Default.subscribe(itemsList);
     var macbook = new Inventory.Item('1');
-    macbook.create('mbp', 'macbook pro');
+    macbook.register('mbp', 'macbook pro');
     macbook.disable();
     macbook.disable();
     var iphone = new Inventory.Item('2');
-    iphone.create('iphone', 'Iphone 5');
+    iphone.register('iphone', 'Iphone 5');
     itemsList.print();
 })(Program || (Program = {}));
 //# sourceMappingURL=Main.js.map

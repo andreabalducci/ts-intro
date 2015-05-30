@@ -6,12 +6,11 @@ module Inventory {
 		constructor() {
 			super();
 
-			this.On<ItemCreated>(EventStore.getClassName(ItemCreated), e => {
-				console.log('Item was actually created', e);
+			this.On(ItemCreated.Type, e => {
 			});
 
-			this.On<ItemDisabled>(EventStore.getClassName(ItemDisabled), e=> {
-				console.log('Item was disabled', e);
+			this.On(ItemDisabled.Type, e=> {
+				this.disabled = true;
 			});
 		}
 
@@ -24,7 +23,7 @@ module Inventory {
 			super(id, new ItemState())
 		}
 
-		create(id: string, description: string) {
+		register(id: string, description: string) {
 			this.RaiseEvent(new ItemCreated(id, description));
 		}
 
@@ -37,12 +36,14 @@ module Inventory {
 	
 	/* events */
 	export class ItemCreated extends EventStore.Event {
+		static Type : ItemCreated = new ItemCreated(null,null);
 		constructor(public id: string, public description: string) {
 			super();
 		}
 	}
 
 	export class ItemDisabled extends EventStore.Event {
+		static Type : ItemDisabled = new ItemDisabled();
 		constructor() {
 			super();
 		}

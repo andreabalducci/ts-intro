@@ -12,13 +12,11 @@ var EventStore;
         var results = (funcNameRegex).exec(o.constructor.toString());
         return (results && results.length > 1) ? results[1] : "";
     }
-    EventStore.getType = getType;
     function getClassName(o) {
         var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec(o.toString());
         return (results && results.length > 1) ? results[1] : "";
     }
-    EventStore.getClassName = getClassName;
     var Event = (function () {
         function Event() {
             this.eventId = "evt_" + Event.EventCounter++;
@@ -34,14 +32,13 @@ var EventStore;
         function Projection() {
             this.handlers = new Array();
         }
-        Projection.prototype.On = function (name, handler) {
-            console.log('registered handler', name, handler);
+        Projection.prototype.On = function (event, handler) {
+            var name = getType(event);
             this.handlers[name] = handler;
         };
         Projection.prototype.Handle = function (event) {
             var name = event.GetType();
             var handler = this.handlers[name];
-            console.log('handling ', name, handler);
             if (handler)
                 handler(event);
         };
