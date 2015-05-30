@@ -12,14 +12,15 @@ var Inventory;
         function ItemState() {
             var _this = this;
             _super.call(this);
-            this.On(ItemCreated.Type, function (e) {
-            });
-            this.On(ItemDisabled.Type, function (e) {
-                _this.disabled = true;
-            });
+            this.disabled = false;
+            this.inStock = 0;
+            this.On(ItemDisabled.Type, function (e) { return _this.disabled = true; });
+            this.On(ItemLoaded.Type, function (e) { return _this.inStock += e.quantity; });
+            this.On(ItemPicked.Type, function (e) { return _this.inStock -= e.quantity; });
         }
         ItemState.prototype.hasBeenDisabled = function () { return this.disabled; };
         ;
+        ItemState.prototype.stockLevel = function () { return this.inStock; };
         return ItemState;
     })(EventStore.AggregateState);
     var Item = (function (_super) {
@@ -33,6 +34,19 @@ var Inventory;
         Item.prototype.disable = function () {
             if (!this.State.hasBeenDisabled()) {
                 this.RaiseEvent(new ItemDisabled());
+            }
+        };
+        Item.prototype.load = function (quantity) {
+            this.RaiseEvent(new ItemLoaded(quantity));
+        };
+        Item.prototype.unLoad = function (quantity) {
+            var currentStock = this.State.stockLevel();
+            console.log('stock level is ', currentStock);
+            if (currentStock >= quantity) {
+                this.RaiseEvent(new ItemPicked(quantity));
+            }
+            else {
+                this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
             }
         };
         return Item;
@@ -59,5 +73,36 @@ var Inventory;
         return ItemDisabled;
     })(EventStore.Event);
     Inventory.ItemDisabled = ItemDisabled;
+    var ItemLoaded = (function (_super) {
+        __extends(ItemLoaded, _super);
+        function ItemLoaded(quantity) {
+            _super.call(this);
+            this.quantity = quantity;
+        }
+        ItemLoaded.Type = new ItemLoaded(0);
+        return ItemLoaded;
+    })(EventStore.Event);
+    Inventory.ItemLoaded = ItemLoaded;
+    var ItemPicked = (function (_super) {
+        __extends(ItemPicked, _super);
+        function ItemPicked(quantity) {
+            _super.call(this);
+            this.quantity = quantity;
+        }
+        ItemPicked.Type = new ItemPicked(0);
+        return ItemPicked;
+    })(EventStore.Event);
+    Inventory.ItemPicked = ItemPicked;
+    var ItemPickingFailed = (function (_super) {
+        __extends(ItemPickingFailed, _super);
+        function ItemPickingFailed(requested, inStock) {
+            _super.call(this);
+            this.requested = requested;
+            this.inStock = inStock;
+        }
+        ItemPickingFailed.Type = new ItemPickingFailed(0, 0);
+        return ItemPickingFailed;
+    })(EventStore.Event);
+    Inventory.ItemPickingFailed = ItemPickingFailed;
 })(Inventory || (Inventory = {}));
 //# sourceMappingURL=Item.js.map

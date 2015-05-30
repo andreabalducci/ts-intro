@@ -9,7 +9,7 @@ module EventStore {
 	}
 
 	export interface IEvent {
-		streamId : string;
+		streamId: string;
 		eventId: string;
 		GetType(): string;
 	}
@@ -24,7 +24,7 @@ module EventStore {
 	}
 	
 	/* Implementations */
-	 function getType(o): string {
+	function getType(o): string {
 		var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec((<any> o).constructor.toString());
         return (results && results.length > 1) ? results[1] : "";
@@ -38,6 +38,7 @@ module EventStore {
 
 	export class Event {
 		static EventCounter: number = 0;
+		static Type:Event = new Event();
 		streamId: string;
 		eventId: string;
 		constructor() {
@@ -51,15 +52,19 @@ module EventStore {
 
 	export class Projection {
 		private handlers: Array<IEventHandler<IEvent>> = new Array<IEventHandler<IEvent>>();
-		protected On<T extends IEvent>(event:T, handler: IEventHandler<T>) {
+		protected On<T extends IEvent>(event: T, handler: IEventHandler<T>) {
 			var name = getType(event);
 			this.handlers[name] = handler;
 		}
 
 		public Handle(event: IEvent) {
-			var name = event.GetType();
-			var handler = this.handlers[name];
-			if(handler)
+			this.HandleEvent(event.GetType(), event);
+			this.HandleEvent(getType(Event.Type), event);
+		}
+
+		private HandleEvent(typeName: string, event: IEvent) {
+			var handler = this.handlers[typeName];
+			if (handler)
 				handler(event);
 		}
 	}
@@ -73,7 +78,7 @@ module EventStore {
 	export class Aggregate<TState extends AggregateState> {
 		private Events: Array<IEvent> = new Array<IEvent>();
 
-		constructor(protected id:string, protected State: TState) {
+		constructor(protected id: string, protected State: TState) {
 
 		}
 
@@ -84,22 +89,22 @@ module EventStore {
 			Bus.Default.publish(event);
 		}
 	}
-	
-	export class Bus implements IBus{
-		static Default : Bus  = new Bus();
-		private Consumers : Array<Projection> = new Array<Projection>();
-		
-		send(command : ICommand):void{
-			
+
+	export class Bus implements IBus {
+		static Default: Bus = new Bus();
+		private Consumers: Array<Projection> = new Array<Projection>();
+
+		send(command: ICommand): void {
+
 		}
-		
-		publish(event :IEvent):void{
-			this.Consumers.forEach(function(consumer:Projection) {
+
+		publish(event: IEvent): void {
+			this.Consumers.forEach(function(consumer: Projection) {
 				consumer.Handle(event);
 			}, this);
 		}
-		
-		subscribe(consumer : Projection) : void{
+
+		subscribe(consumer: Projection): void {
 			this.Consumers.push(consumer);
 		}
 	}

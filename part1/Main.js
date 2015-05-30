@@ -24,6 +24,9 @@ var Program;
             this.On(Inventory.ItemDisabled.Type, function (e) {
                 _this.allItems.getValue(e.streamId).active = false;
             });
+            this.On(EventStore.Event.Type, function (e) {
+                console.log('generic handler for ', e);
+            });
         }
         ItemsList.prototype.print = function () {
             console.log("----------------------------");
@@ -39,7 +42,9 @@ var Program;
     var macbook = new Inventory.Item('1');
     macbook.register('mbp', 'macbook pro');
     macbook.disable();
-    macbook.disable();
+    macbook.load(10);
+    macbook.unLoad(4);
+    macbook.unLoad(8);
     var iphone = new Inventory.Item('2');
     iphone.register('iphone', 'Iphone 5');
     itemsList.print();

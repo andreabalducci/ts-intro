@@ -25,6 +25,7 @@ var EventStore;
             return getType(this);
         };
         Event.EventCounter = 0;
+        Event.Type = new Event();
         return Event;
     })();
     EventStore.Event = Event;
@@ -37,8 +38,11 @@ var EventStore;
             this.handlers[name] = handler;
         };
         Projection.prototype.Handle = function (event) {
-            var name = event.GetType();
-            var handler = this.handlers[name];
+            this.HandleEvent(event.GetType(), event);
+            this.HandleEvent(getType(Event.Type), event);
+        };
+        Projection.prototype.HandleEvent = function (typeName, event) {
+            var handler = this.handlers[typeName];
             if (handler)
                 handler(event);
         };
