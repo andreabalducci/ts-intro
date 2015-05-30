@@ -13,8 +13,8 @@ module EventStore {
 		GetType(): string;
 	}
 
-	export interface IEventHandler {
-		(event: IEvent): void;
+	export interface IEventHandler<T extends IEvent> {
+		(event: T): void;
 	}
 
 	export interface IBus {
@@ -49,13 +49,13 @@ module EventStore {
 	}
 
 	export class Projection {
-		private handlers: Array<IEventHandler> = new Array<IEventHandler>();
-		protected Register(name: string, handler: IEventHandler) {
+		private handlers: Array<IEventHandler<IEvent>> = new Array<IEventHandler<IEvent>>();
+		protected Register<T extends IEvent>(name: string, handler: IEventHandler<T>) {
 			console.log('registered handler', name, handler);
 			this.handlers[name] = handler;
 		}
 
-		protected On(event: IEvent) {
+		public On(event: IEvent) {
 			var name = event.GetType();
 			var handler = this.handlers[name];
 			console.log('handling ', name, handler);
@@ -79,6 +79,26 @@ module EventStore {
 		protected RaiseEvent(event: IEvent): void {
 			this.events.push(event);
 			this.state.Apply(event);
+			Bus.Default.publish(event);
+		}
+	}
+	
+	export class Bus implements IBus{
+		static Default : Bus  = new Bus();
+		private Consumers : Array<Projection> = new Array<Projection>();
+		
+		send(command : ICommand):void{
+			
+		}
+		
+		publish(event :IEvent):void{
+			this.Consumers.forEach(function(consumer:Projection) {
+				consumer.On(event);
+			}, this);
+		}
+		
+		subscribe(consumer : Projection) : void{
+			this.Consumers.push(consumer);
 		}
 	}
 }

@@ -66,9 +66,28 @@ var EventStore;
         Aggregate.prototype.RaiseEvent = function (event) {
             this.events.push(event);
             this.state.Apply(event);
+            Bus.Default.publish(event);
         };
         return Aggregate;
     })();
     EventStore.Aggregate = Aggregate;
+    var Bus = (function () {
+        function Bus() {
+            this.Consumers = new Array();
+        }
+        Bus.prototype.send = function (command) {
+        };
+        Bus.prototype.publish = function (event) {
+            this.Consumers.forEach(function (consumer) {
+                consumer.On(event);
+            }, this);
+        };
+        Bus.prototype.subscribe = function (consumer) {
+            this.Consumers.push(consumer);
+        };
+        Bus.Default = new Bus();
+        return Bus;
+    })();
+    EventStore.Bus = Bus;
 })(EventStore || (EventStore = {}));
 //# sourceMappingURL=EventStore.js.map
