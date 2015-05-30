@@ -1,25 +1,51 @@
-/// <reference path="Quantity.ts"/>
+/// <reference path="EventStore.ts"/>
 module Inventory {
-	class Item {
-		private _quantity: number = 0;
-		constructor(public id: string) {
-			var q = new Quantity(10, "pz");
-			q.add(new Quantity(10, "pcs"));
+	class ItemState extends EventStore.AggregateState {
+		constructor() {
+			super();
+
+			this.Register(ItemCreated.GetType(), e => {
+				console.log('Item was actually created', e);
+			});
+
+			this.Register(ItemDisabled.GetType(), e=> {
+				console.log('Item was disabled', e);
+			});
+		}
+	}
+
+	export class Item extends EventStore.Aggregate {
+		constructor() {
+			super(new ItemState())
 		}
 
-		load(quantity: number):void {
-			this._quantity += quantity;
+		create(id: string, description: string) {
+			this.RaiseEvent(new ItemCreated(id, description));
 		}
-
-		unload(quantity: number):void {
-			if (this._quantity >= quantity) {
-				this._quantity -= quantity;
-			} else {
-				throw "Quantity " + quantity + " not available";
-			}
+		
+		disable(){
+			this.RaiseEvent(new ItemDisabled());
 		}
 	}
 	
 	
-	var i = new Item("abc");
+	/* events */
+	export class ItemCreated extends EventStore.Event {
+		static GetType(): string {
+			return "ItemCreated";
+		}
+		constructor(public id: string, public description: string) {
+			super();
+		}
+	}
+
+	export class ItemDisabled extends EventStore.Event {
+		static GetType(): string {
+			return "ItemDisabled";
+		}
+		
+		constructor() {
+			super();
+		}
+	}
 }
