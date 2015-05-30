@@ -17,6 +17,14 @@ var EventStore;
         var results = (funcNameRegex).exec(o.toString());
         return (results && results.length > 1) ? results[1] : "";
     }
+    var DomainError = (function () {
+        function DomainError(message) {
+            this.message = message;
+            this.name = getType(this);
+        }
+        return DomainError;
+    })();
+    EventStore.DomainError = DomainError;
     var Event = (function () {
         function Event() {
             this.eventId = "evt_" + Event.EventCounter++;

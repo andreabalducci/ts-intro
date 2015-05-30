@@ -7,6 +7,17 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="EventStore.ts"/>
 var Inventory;
 (function (Inventory) {
+    /* ERRORS */
+    var ItemCannotBeDisabledError = (function (_super) {
+        __extends(ItemCannotBeDisabledError, _super);
+        function ItemCannotBeDisabledError(inStock) {
+            _super.call(this, "In stock " + inStock);
+            this.inStock = inStock;
+        }
+        return ItemCannotBeDisabledError;
+    })(EventStore.DomainError);
+    Inventory.ItemCannotBeDisabledError = ItemCannotBeDisabledError;
+    /* state & aggregate */
     var ItemState = (function (_super) {
         __extends(ItemState, _super);
         function ItemState() {
@@ -32,16 +43,19 @@ var Inventory;
             this.RaiseEvent(new ItemCreated(id, description));
         };
         Item.prototype.disable = function () {
+            if (this.State.stockLevel() > 0) {
+                throw new ItemCannotBeDisabledError(this.State.stockLevel());
+            }
             if (!this.State.hasBeenDisabled()) {
                 this.RaiseEvent(new ItemDisabled());
             }
         };
         Item.prototype.load = function (quantity) {
+            Error();
             this.RaiseEvent(new ItemLoaded(quantity));
         };
         Item.prototype.unLoad = function (quantity) {
             var currentStock = this.State.stockLevel();
-            console.log('stock level is ', currentStock);
             if (currentStock >= quantity) {
                 this.RaiseEvent(new ItemPicked(quantity));
             }

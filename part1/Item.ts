@@ -1,17 +1,26 @@
 /// <reference path="EventStore.ts"/>
 module Inventory {
+	/* ERRORS */
+	export class ItemCannotBeDisabledError extends EventStore.DomainError {
+		constructor(public inStock:number){
+			super("In stock " + inStock);
+		}
+	}
+
+	/* state & aggregate */
+
 	class ItemState extends EventStore.AggregateState {
 		private disabled: boolean = false;
-		private inStock : number = 0;
+		private inStock: number = 0;
 		constructor() {
 			super();
 			this.On(ItemDisabled.Type, e=> this.disabled = true);
-			this.On(ItemLoaded.Type,e=> this.inStock += e.quantity);
-			this.On(ItemPicked.Type,e=> this.inStock -= e.quantity);
+			this.On(ItemLoaded.Type, e=> this.inStock += e.quantity);
+			this.On(ItemPicked.Type, e=> this.inStock -= e.quantity);
 		}
 
 		hasBeenDisabled(): boolean { return this.disabled };
-		stockLevel():number {return this.inStock;}
+		stockLevel(): number { return this.inStock; }
 	}
 
 	export class Item extends EventStore.Aggregate<ItemState> {
@@ -24,24 +33,31 @@ module Inventory {
 		}
 
 		disable() {
+			if (this.State.stockLevel() > 0) {
+				throw new ItemCannotBeDisabledError(this.State.stockLevel());
+			}
+
 			if (!this.State.hasBeenDisabled()) {
 				this.RaiseEvent(new ItemDisabled());
 			}
 		}
 
 		load(quantity: number): void {
+			Error()
 			this.RaiseEvent(new ItemLoaded(quantity))
 		}
 
 		unLoad(quantity: number): void {
 			var currentStock = this.State.stockLevel();
-			if(currentStock >= quantity){
+			if (currentStock >= quantity) {
 				this.RaiseEvent(new ItemPicked(quantity))
-			}else{
-				this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));			
+			} else {
+				this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
 			}
 		}
 	}
+
+	
 	
 	/* events */
 	export class ItemCreated extends EventStore.Event {
@@ -73,8 +89,8 @@ module Inventory {
 		}
 	}
 	export class ItemPickingFailed extends EventStore.Event {
-		static Type: ItemPickingFailed = new ItemPickingFailed(0,0);
-		constructor(public requested: number, public inStock : number) {
+		static Type: ItemPickingFailed = new ItemPickingFailed(0, 0);
+		constructor(public requested: number, public inStock: number) {
 			super();
 		}
 	}

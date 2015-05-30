@@ -13,19 +13,19 @@ module Program {
 
 		constructor() {
 			super();
-			
+
 			this.On(Inventory.ItemCreated.Type, e => {
 				this.allItems.add(e.streamId, {
 					id: e.id,
 					description: e.description,
 					active: true
 				});
-			});			
-			
+			});
+
 			this.On(Inventory.ItemDisabled.Type, e => {
 				this.allItems.getValue(e.streamId).active = false;
 			});
-			
+
 			this.On(EventStore.Event.Type, e => {
 				console.log('generic handler for ', e);
 			})
@@ -45,14 +45,20 @@ module Program {
 
 	var macbook = new Inventory.Item('1');
 	macbook.register('mbp', 'macbook pro');
-	macbook.disable();
 	macbook.load(10);
 	macbook.unLoad(4);
 	macbook.unLoad(8);
+	try {
+		macbook.disable();
+	} catch (err) {
+		if (err instanceof Inventory.ItemCannotBeDisabledError) {
+			console.error('Still available:', (<Inventory.ItemCannotBeDisabledError>err).inStock);
+		}
+	}
 
-	
+
 	var iphone = new Inventory.Item('2');
 	iphone.register('iphone', 'Iphone 5');
-	
+
 	itemsList.print();
 }

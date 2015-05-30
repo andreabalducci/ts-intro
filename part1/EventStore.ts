@@ -35,6 +35,15 @@ module EventStore {
         var results = (funcNameRegex).exec((<any> o).toString());
         return (results && results.length > 1) ? results[1] : "";
 	}
+	
+	export class DomainError implements Error{
+		name: string;
+    	
+		constructor(public message ?:string){
+			this.name = getType(this);
+		}
+	}
+
 
 	export class Event {
 		static EventCounter: number = 0;

@@ -41,10 +41,17 @@ var Program;
     EventStore.Bus.Default.subscribe(itemsList);
     var macbook = new Inventory.Item('1');
     macbook.register('mbp', 'macbook pro');
-    macbook.disable();
     macbook.load(10);
     macbook.unLoad(4);
     macbook.unLoad(8);
+    try {
+        macbook.disable();
+    }
+    catch (err) {
+        if (err instanceof Inventory.ItemCannotBeDisabledError) {
+            console.error('Still available:', err.inStock);
+        }
+    }
     var iphone = new Inventory.Item('2');
     iphone.register('iphone', 'Iphone 5');
     itemsList.print();
