@@ -9,6 +9,7 @@ module EventStore {
 	}
 
 	export interface IEvent {
+		streamId : string;
 		eventId: string;
 		GetType(): string;
 	}
@@ -37,7 +38,7 @@ module EventStore {
 
 	export class Event {
 		static EventCounter: number = 0;
-
+		streamId: string;
 		eventId: string;
 		constructor() {
 			this.eventId = "evt_" + Event.EventCounter++;
@@ -72,11 +73,12 @@ module EventStore {
 	export class Aggregate {
 		private events: Array<IEvent> = new Array<IEvent>();
 
-		constructor(protected state: AggregateState) {
+		constructor(protected id:string, protected state: AggregateState) {
 
 		}
 
 		protected RaiseEvent(event: IEvent): void {
+			event.streamId = this.id;
 			this.events.push(event);
 			this.state.Apply(event);
 			Bus.Default.publish(event);

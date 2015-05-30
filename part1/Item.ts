@@ -15,8 +15,8 @@ module Inventory {
 	}
 
 	export class Item extends EventStore.Aggregate {
-		constructor() {
-			super(new ItemState())
+		constructor(id:string) {
+			super(id, new ItemState())
 		}
 
 		create(id: string, description: string) {

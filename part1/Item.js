@@ -22,8 +22,8 @@ var Inventory;
     })(EventStore.AggregateState);
     var Item = (function (_super) {
         __extends(Item, _super);
-        function Item() {
-            _super.call(this, new ItemState());
+        function Item(id) {
+            _super.call(this, id, new ItemState());
         }
         Item.prototype.create = function (id, description) {
             this.RaiseEvent(new ItemCreated(id, description));

@@ -15,30 +15,31 @@ var Program;
             _super.call(this);
             this.allItems = new Collections.Dictionary();
             this.Register(EventStore.getClassName(Inventory.ItemCreated), function (e) {
-                _this.allItems.add(e.id, {
+                _this.allItems.add(e.streamId, {
                     id: e.id,
                     description: e.description,
                     active: true
                 });
             });
             this.Register(EventStore.getClassName(Inventory.ItemDisabled), function (e) {
+                _this.allItems.getValue(e.streamId).active = false;
             });
         }
         ItemsList.prototype.print = function () {
             console.log("----------------------------");
             console.log("Item list");
             console.log("----------------------------");
-            console.log(this.allItems.values());
+            this.allItems.values().forEach(function (e) { return console.log(e); });
             console.log("----------------------------");
         };
         return ItemsList;
     })(EventStore.Projection);
     var itemsList = new ItemsList();
     EventStore.Bus.Default.subscribe(itemsList);
-    var macbook = new Inventory.Item();
+    var macbook = new Inventory.Item('1');
     macbook.create('mbp', 'macbook pro');
     macbook.disable();
-    var iphone = new Inventory.Item();
+    var iphone = new Inventory.Item('2');
     iphone.create('iphone', 'Iphone 5');
     itemsList.print();
 })(Program || (Program = {}));

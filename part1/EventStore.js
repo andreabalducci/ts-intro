@@ -59,11 +59,13 @@ var EventStore;
     })(Projection);
     EventStore.AggregateState = AggregateState;
     var Aggregate = (function () {
-        function Aggregate(state) {
+        function Aggregate(id, state) {
+            this.id = id;
             this.state = state;
             this.events = new Array();
         }
         Aggregate.prototype.RaiseEvent = function (event) {
+            event.streamId = this.id;
             this.events.push(event);
             this.state.Apply(event);
             Bus.Default.publish(event);
