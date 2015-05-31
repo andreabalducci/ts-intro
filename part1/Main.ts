@@ -43,6 +43,7 @@ module Program {
 	var itemsList = new ItemsList();
 	EventStore.Bus.Default.subscribe(itemsList);
 	EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
+	EventStore.Bus.Default.On(Inventory.DisableItem.Type, new Inventory.DisableItemHandler());
 
 
 //	var macbook = new Inventory.Item('1');
@@ -63,7 +64,9 @@ module Program {
 //	iphone.register('iphone', 'Iphone 5');
 
 	EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1","abc","a new item"));
-
+	EventStore.Bus.Default.send(new Inventory.DisableItem("item_1"));
 
 	itemsList.print();
+	
+	EventStore.Persistence.dump();
 }

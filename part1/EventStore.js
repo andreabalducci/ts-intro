@@ -98,9 +98,9 @@ var EventStore;
         };
         AggregateState.prototype.checkInvariants = function () {
             this._checks.forEach(function (c) {
-                if (!c.ensure()) {
-                    console.log("rule \'" + c.rule + "\' has been violated");
-                    throw new InvariantViolatedException(c.rule);
+                if (!c.rule()) {
+                    console.log("rule \'" + c.name + "\' has been violated");
+                    throw new InvariantViolatedException(c.name);
                 }
             });
         };
@@ -117,6 +117,10 @@ var EventStore;
             event.streamId = this.aggregateId;
             this.Events.push(event);
             this.State.apply(event);
+        };
+        Aggregate.prototype.loadFromEvents = function (events) {
+            var _this = this;
+            events.forEach(function (e) { return _this.State.apply(e); });
         };
         Aggregate.prototype.getAggregateType = function () {
             return getType(this);
@@ -138,7 +142,12 @@ var EventStore;
         function Stream(streamId) {
             this.streamId = streamId;
             this.commits = new Array();
+            this.events = new Array();
         }
+        Stream.prototype.getStreamId = function () { return this.streamId; };
+        Stream.prototype.getEvents = function () {
+            return this.events;
+        };
         Stream.prototype.commit = function (events, commitId, prepareHeaders) {
             var commit = {
                 commitId: commitId,
@@ -149,6 +158,7 @@ var EventStore;
                 prepareHeaders(commit.headers);
             }
             this.commits.push(commit);
+            this.events = this.events.concat(events);
             console.log('saved commit', commit);
             return commit;
         };
@@ -156,22 +166,27 @@ var EventStore;
     })();
     var Persistence = (function () {
         function Persistence() {
-            this.streams = new Collections.Dictionary();
         }
-        Persistence.prototype.openStream = function (id) {
+        Persistence.openStream = function (id) {
             if (!this.streams.containsKey(id)) {
                 this.streams.add(id, new Stream(id));
             }
             return this.streams.getValue(id);
         };
+        Persistence.dump = function () {
+            this.streams.values().forEach(function (s) { console.log('stream ' + s.getStreamId(), s); });
+        };
+        Persistence.streams = new Collections.Dictionary();
         return Persistence;
     })();
+    EventStore.Persistence = Persistence;
     var Repository = (function () {
         function Repository() {
         }
         Repository.getById = function (type, id) {
+            var stream = Persistence.openStream(id);
             var aggregate = type.Factory(id);
-            // TODO read from stream
+            aggregate.loadFromEvents(stream.getEvents());
             return aggregate;
         };
         Repository.save = function (aggregate, commitId, prepareHeaders) {
@@ -181,7 +196,7 @@ var EventStore;
             // it's ok to save? 
             aggregate.checkInvariants();
             // save on stream
-            var stream = Repository.Persistence.openStream(id);
+            var stream = Persistence.openStream(id);
             stream.commit(aggregate.getUncommitedEvents(), commitId, function (h) {
                 h.add('type', type);
                 if (prepareHeaders) {
@@ -193,7 +208,6 @@ var EventStore;
                 Bus.Default.publish(e);
             });
         };
-        Repository.Persistence = new Persistence();
         return Repository;
     })();
     EventStore.Repository = Repository;

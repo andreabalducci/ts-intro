@@ -110,8 +110,8 @@ module EventStore {
 	}
 
 	interface InvariantCheck {
-		rule: string;
-		ensure<T extends AggregateState>(): Boolean;
+		name: string;
+		rule<T extends AggregateState>(): Boolean;
 	}
 
 	export class AggregateState extends Projection {
@@ -126,9 +126,9 @@ module EventStore {
 
 		checkInvariants() {
 			this._checks.forEach(c => {
-				if (!c.ensure()) {
-					console.log("rule \'" + c.rule + "\' has been violated");
-					throw new InvariantViolatedException(c.rule);
+				if (!c.rule()) {
+					console.log("rule \'" + c.name + "\' has been violated");
+					throw new InvariantViolatedException(c.name);
 				}
 			});
 		}
@@ -136,6 +136,7 @@ module EventStore {
 
 	export interface IAggregateFactory {
 		Factory(id: string): IAggregateFactory;
+		loadFromEvents(events: IEvent[]) : void;
 	}
 
 	export class Aggregate<TState extends AggregateState> implements IAggregate {
@@ -149,6 +150,10 @@ module EventStore {
 			event.streamId = this.aggregateId;
 			this.Events.push(event);
 			this.State.apply(event);
+		}
+
+		loadFromEvents(events: IEvent[]) : void{
+			events.forEach(e=>this.State.apply(e));
 		}
 
 		getAggregateType() {
@@ -173,9 +178,16 @@ module EventStore {
 
 	class Stream {
 		private commits = new Array<ICommit>();
-
+		private events = new Array<IEvent>();
+		
 		constructor(protected streamId: string) {
 
+		}
+
+		getStreamId() {return this.streamId;}
+		
+		getEvents():IEvent[]{
+			return this.events;
 		}
 
 		commit(
@@ -193,29 +205,35 @@ module EventStore {
 				prepareHeaders(commit.headers);
 			}
 			this.commits.push(commit);
-			
+			this.events = this.events.concat(events);
 			console.log('saved commit', commit);
 			
 			return commit;
 		}
 	}
 
-	class Persistence {
-		private streams = new Collections.Dictionary<Stream>();
-		openStream(id: string): Stream {
+	export class Persistence {
+		private static streams = new Collections.Dictionary<Stream>();
+		static openStream(id: string): Stream {
 			if (!this.streams.containsKey(id)) {
 				this.streams.add(id, new Stream(id));
 			}
 
 			return this.streams.getValue(id);
 		}
+		
+		static dump(){
+			this.streams.values().forEach(s => {console.log('stream '+s.getStreamId(), s)});
+		}
 	}
 
 	export class Repository {
-		private static Persistence = new Persistence();
 		static getById<T extends IAggregateFactory>(type: T, id: string): T {
+			var stream = Persistence.openStream(id);
 			var aggregate = <T>type.Factory(id);
-			// TODO read from stream
+		
+			aggregate.loadFromEvents(stream.getEvents());
+			
 			return aggregate;
 		}
 
@@ -228,7 +246,7 @@ module EventStore {
 			aggregate.checkInvariants();
 			
 			// save on stream
-			var stream = Repository.Persistence.openStream(id);
+			var stream = Persistence.openStream(id);
 			stream.commit(aggregate.getUncommitedEvents(), commitId, h=>{
 				h.add('type', type);
 				if(prepareHeaders){

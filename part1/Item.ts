@@ -12,13 +12,20 @@ module Inventory {
 	class ItemState extends EventStore.AggregateState  {
 		private disabled: boolean = false;
 		private inStock: number = 0;
+		private sku:string = null;
+		
 		constructor() {
 			super();
 			this.On(ItemDisabled.Type, e=> this.disabled = true);
 			this.On(ItemLoaded.Type, e=> this.inStock += e.quantity);
 			this.On(ItemPicked.Type, e=> this.inStock -= e.quantity);
-						
-			this.addCheck({rule:"Item in stock should not be disabled", ensure : ()=>
+			this.On(ItemCreated.Type, e => this.sku = e.sku);
+			
+			this.addCheck({name:"Item must have a SKU", rule : ()=>
+				this.sku != null
+			});
+									
+			this.addCheck({name:"Item in stock must not be disabled", rule : ()=>
 				this.stockLevel() == 0 || (this.stockLevel() > 0 && !this.hasBeenDisabled())
 			});
 		}

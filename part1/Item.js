@@ -25,10 +25,16 @@ var Inventory;
             _super.call(this);
             this.disabled = false;
             this.inStock = 0;
+            this.sku = null;
             this.On(ItemDisabled.Type, function (e) { return _this.disabled = true; });
             this.On(ItemLoaded.Type, function (e) { return _this.inStock += e.quantity; });
             this.On(ItemPicked.Type, function (e) { return _this.inStock -= e.quantity; });
-            this.addCheck({ rule: "Item in stock should not be disabled", ensure: function () {
+            this.On(ItemCreated.Type, function (e) { return _this.sku = e.sku; });
+            this.addCheck({ name: "Item must have a SKU", rule: function () {
+                    return _this.sku != null;
+                }
+            });
+            this.addCheck({ name: "Item in stock must not be disabled", rule: function () {
                     return _this.stockLevel() == 0 || (_this.stockLevel() > 0 && !_this.hasBeenDisabled());
                 }
             });
