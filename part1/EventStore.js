@@ -132,6 +132,39 @@ var EventStore;
         return Aggregate;
     })();
     EventStore.Aggregate = Aggregate;
+    ;
+    var Stream = (function () {
+        function Stream(streamId) {
+            this.streamId = streamId;
+            this.commits = new Array();
+        }
+        Stream.prototype.commit = function (events, commitId, prepareHeaders) {
+            var commit = {
+                commitId: commitId,
+                events: events,
+                headers: new Collections.Dictionary()
+            };
+            if (prepareHeaders) {
+                prepareHeaders(commit.headers);
+            }
+            this.commits.push(commit);
+            console.log('saved commit', commit);
+            return commit;
+        };
+        return Stream;
+    })();
+    var Persistence = (function () {
+        function Persistence() {
+            this.streams = new Collections.Dictionary();
+        }
+        Persistence.prototype.openStream = function (id) {
+            if (!this.streams.containsKey(id)) {
+                this.streams.add(id, new Stream(id));
+            }
+            return this.streams.getValue(id);
+        };
+        return Persistence;
+    })();
     var Repository = (function () {
         function Repository() {
         }
@@ -140,14 +173,21 @@ var EventStore;
             // TODO read from stream
             return aggregate;
         };
-        Repository.save = function (aggregate) {
-            console.log('saving ' + aggregate.getAggregateType() + "[" + aggregate.getAggregateId() + "]");
+        Repository.save = function (aggregate, commitId, prepareHeaders) {
+            var id = aggregate.getAggregateId();
+            var type = aggregate.getAggregateType();
+            console.log('saving ' + type + "[" + id + "]");
             aggregate.checkInvariants();
             // TODO save on stream
+            var stream = Repository.Persistence.openStream(id);
+            stream.commit(aggregate.getUncommitedEvents(), commitId, function (h) {
+                h.add('type', type);
+            });
             aggregate.getUncommitedEvents().forEach(function (e) {
                 Bus.Default.publish(e);
             });
         };
+        Repository.Persistence = new Persistence();
         return Repository;
     })();
     EventStore.Repository = Repository;

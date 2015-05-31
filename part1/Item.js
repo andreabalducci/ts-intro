@@ -56,7 +56,7 @@ var Inventory;
         RegisterItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.id);
             item.register(command.id, command.description);
-            EventStore.Repository.save(item);
+            EventStore.Repository.save(item, command.commandId);
         };
         return RegisterItemHandler;
     })();

@@ -39,7 +39,7 @@ module Inventory {
 		Handle(command : RegisterItem){
 			var item = EventStore.Repository.getById(Item.Type, command.id);
 			item.register(command.id, command.description);
-			EventStore.Repository.save(item);
+			EventStore.Repository.save(item, command.commandId);
 		}
 	}
 	
