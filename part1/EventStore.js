@@ -91,10 +91,6 @@ var EventStore;
             this.State.Apply(event);
             Bus.Default.publish(event);
         };
-        Aggregate.prototype.Factory = function (id) {
-            throw "Factory not implemented in " + getType(this);
-            return null;
-        };
         return Aggregate;
     })();
     EventStore.Aggregate = Aggregate;

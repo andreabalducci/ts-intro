@@ -33,7 +33,6 @@ module Inventory {
 	
 	export class RegisterItemHandler implements EventStore.ICommandHandler<RegisterItem>{
 		Handle(command : RegisterItem){
-			debugger;
 			var item = EventStore.Repository.getById(Item.Type, command.id);
 			item.register(command.id, command.description);
 		}
@@ -78,7 +77,7 @@ module Inventory {
 	
 	/* AGGREGATE */
 	
-	export class Item extends EventStore.Aggregate<ItemState> {
+	export class Item extends EventStore.Aggregate<ItemState> implements EventStore.IAggregateFactory {
 		static Type: Item = new Item(null);
 		constructor(id: string) {
 			super(id, new ItemState())
@@ -110,6 +109,10 @@ module Inventory {
 			} else {
 				this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
 			}
+		}
+		
+		Factory(id:string){
+			return new Item(id);
 		}
 	}
 }

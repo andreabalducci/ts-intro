@@ -50,7 +50,6 @@ var Inventory;
         function RegisterItemHandler() {
         }
         RegisterItemHandler.prototype.Handle = function (command) {
-            debugger;
             var item = EventStore.Repository.getById(Item.Type, command.id);
             item.register(command.id, command.description);
         };
@@ -138,6 +137,9 @@ var Inventory;
             else {
                 this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
             }
+        };
+        Item.prototype.Factory = function (id) {
+            return new Item(id);
         };
         Item.Type = new Item(null);
         return Item;

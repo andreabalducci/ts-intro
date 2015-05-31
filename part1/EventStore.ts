@@ -97,11 +97,11 @@ module EventStore {
 		}
 	}
 	
-	export interface IAggregate{
-		Factory(id:string):IAggregate;
+	export interface IAggregateFactory{
+		Factory(id:string):IAggregateFactory;
 	}
 
-	export class Aggregate<TState extends AggregateState> implements IAggregate {
+	export class Aggregate<TState extends AggregateState> {
 		private Events: Array<IEvent> = new Array<IEvent>();
 
 		constructor(protected id: string, protected State: TState) {
@@ -114,16 +114,11 @@ module EventStore {
 			this.State.Apply(event);
 			Bus.Default.publish(event);
 		}
-		
-		public Factory(id:string){
-			throw "Factory not implemented in "+getType(this);
-			return <IAggregate>null;
-		}
 	}
 
 	export class Repository
 	{
-		static getById<T extends IAggregate>(type:T, id:string) : T{
+		static getById<T extends IAggregateFactory>(type:T, id:string) : T{
 			return <T>type.Factory(id);
 		}
 	}
