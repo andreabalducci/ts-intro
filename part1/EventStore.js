@@ -7,11 +7,17 @@ var __extends = this.__extends || function (d, b) {
 var EventStore;
 (function (EventStore) {
     /* Implementations */
+    /**
+     * getType from object instance
+     */
     function getType(o) {
         var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec(o.constructor.toString());
         return (results && results.length > 1) ? results[1] : "";
     }
+    /**
+     * Get class name from type
+     */
     function getClassName(o) {
         var funcNameRegex = /function (.{1,})\(/;
         var results = (funcNameRegex).exec(o.toString());
@@ -25,6 +31,15 @@ var EventStore;
         return DomainError;
     })();
     EventStore.DomainError = DomainError;
+    var InvariantViolatedException = (function (_super) {
+        __extends(InvariantViolatedException, _super);
+        function InvariantViolatedException() {
+            _super.apply(this, arguments);
+            this.InvariantViolatedException = "";
+        }
+        return InvariantViolatedException;
+    })(DomainError);
+    EventStore.InvariantViolatedException = InvariantViolatedException;
     var Command = (function () {
         function Command() {
             this.commandId = "cmd_" + Command.CommandCounter++;
@@ -72,24 +87,47 @@ var EventStore;
         __extends(AggregateState, _super);
         function AggregateState() {
             _super.apply(this, arguments);
+            this._checks = new Array();
         }
-        AggregateState.prototype.Apply = function (event) {
+        AggregateState.prototype.apply = function (event) {
             this.Handle(event);
+        };
+        AggregateState.prototype.addCheck = function (check) {
+            this._checks.push(check);
+        };
+        AggregateState.prototype.checkInvariants = function () {
+            this._checks.forEach(function (c) {
+                if (!c.ensure()) {
+                    console.log("rule \'" + c.rule + "\' has been violated");
+                    throw new InvariantViolatedException(c.rule);
+                }
+            });
         };
         return AggregateState;
     })(Projection);
     EventStore.AggregateState = AggregateState;
     var Aggregate = (function () {
-        function Aggregate(id, State) {
-            this.id = id;
+        function Aggregate(aggregateId, State) {
+            this.aggregateId = aggregateId;
             this.State = State;
             this.Events = new Array();
         }
         Aggregate.prototype.RaiseEvent = function (event) {
-            event.streamId = this.id;
+            event.streamId = this.aggregateId;
             this.Events.push(event);
-            this.State.Apply(event);
-            Bus.Default.publish(event);
+            this.State.apply(event);
+        };
+        Aggregate.prototype.getAggregateType = function () {
+            return getType(this);
+        };
+        Aggregate.prototype.getAggregateId = function () {
+            return this.aggregateId;
+        };
+        Aggregate.prototype.getUncommitedEvents = function () {
+            return this.Events;
+        };
+        Aggregate.prototype.checkInvariants = function () {
+            this.State.checkInvariants();
         };
         return Aggregate;
     })();
@@ -98,7 +136,17 @@ var EventStore;
         function Repository() {
         }
         Repository.getById = function (type, id) {
-            return type.Factory(id);
+            var aggregate = type.Factory(id);
+            // TODO read from stream
+            return aggregate;
+        };
+        Repository.save = function (aggregate) {
+            console.log('saving ' + aggregate.getAggregateType() + "[" + aggregate.getAggregateId() + "]");
+            aggregate.checkInvariants();
+            // TODO save on stream
+            aggregate.getUncommitedEvents().forEach(function (e) {
+                Bus.Default.publish(e);
+            });
         };
         return Repository;
     })();

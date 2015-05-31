@@ -9,7 +9,7 @@ module Inventory {
 
 	/* state & aggregate */
 
-	class ItemState extends EventStore.AggregateState {
+	class ItemState extends EventStore.AggregateState  {
 		private disabled: boolean = false;
 		private inStock: number = 0;
 		constructor() {
@@ -17,6 +17,10 @@ module Inventory {
 			this.On(ItemDisabled.Type, e=> this.disabled = true);
 			this.On(ItemLoaded.Type, e=> this.inStock += e.quantity);
 			this.On(ItemPicked.Type, e=> this.inStock -= e.quantity);
+						
+			this.addCheck({rule:"Item in stock should not be disabled", ensure : ()=>
+				this.stockLevel() == 0 || (this.stockLevel() > 0 && !this.hasBeenDisabled())
+			});
 		}
 
 		hasBeenDisabled(): boolean { return this.disabled };
@@ -35,6 +39,7 @@ module Inventory {
 		Handle(command : RegisterItem){
 			var item = EventStore.Repository.getById(Item.Type, command.id);
 			item.register(command.id, command.description);
+			EventStore.Repository.save(item);
 		}
 	}
 	

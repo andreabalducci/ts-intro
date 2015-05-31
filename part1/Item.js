@@ -28,6 +28,10 @@ var Inventory;
             this.On(ItemDisabled.Type, function (e) { return _this.disabled = true; });
             this.On(ItemLoaded.Type, function (e) { return _this.inStock += e.quantity; });
             this.On(ItemPicked.Type, function (e) { return _this.inStock -= e.quantity; });
+            this.addCheck({ rule: "Item in stock should not be disabled", ensure: function () {
+                    return _this.stockLevel() == 0 || (_this.stockLevel() > 0 && !_this.hasBeenDisabled());
+                }
+            });
         }
         ItemState.prototype.hasBeenDisabled = function () { return this.disabled; };
         ;
@@ -52,6 +56,7 @@ var Inventory;
         RegisterItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.id);
             item.register(command.id, command.description);
+            EventStore.Repository.save(item);
         };
         return RegisterItemHandler;
     })();

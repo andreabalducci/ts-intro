@@ -45,22 +45,22 @@ module Program {
 	EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
 
 
-	var macbook = new Inventory.Item('1');
-	macbook.register('mbp', 'macbook pro');
-	macbook.load(10);
-	macbook.unLoad(4);
-	macbook.unLoad(8);
-	try {
-		macbook.disable();
-	} catch (err) {
-		if (err instanceof Inventory.ItemCannotBeDisabledError) {
-			console.error('Still available:', (<Inventory.ItemCannotBeDisabledError>err).inStock);
-		}
-	}
-
-
-	var iphone = new Inventory.Item('2');
-	iphone.register('iphone', 'Iphone 5');
+//	var macbook = new Inventory.Item('1');
+//	macbook.register('mbp', 'macbook pro');
+//	macbook.load(10);
+//	macbook.unLoad(4);
+//	macbook.unLoad(8);
+//	try {
+//		macbook.disable();
+//	} catch (err) {
+//		if (err instanceof Inventory.ItemCannotBeDisabledError) {
+//			console.error('Still available:', (<Inventory.ItemCannotBeDisabledError>err).inStock);
+//		}
+//	}
+//
+//
+//	var iphone = new Inventory.Item('2');
+//	iphone.register('iphone', 'Iphone 5');
 
 	EventStore.Bus.Default.send(new Inventory.RegisterItem("abc","a new item"));
 
