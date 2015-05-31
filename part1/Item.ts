@@ -53,8 +53,8 @@ module Inventory {
 	
 	/* handlers */
 	export class RegisterItemHandler implements EventStore.ICommandHandler<RegisterItem>{
-		constructor(){
-			EventStore.Bus.Default.On(Inventory.RegisterItem.Type, this);
+		constructor(bus: EventStore.Bus){
+			bus.On(Inventory.RegisterItem.Type, this);
 		}
 		
 		Handle(command : RegisterItem){
@@ -67,8 +67,8 @@ module Inventory {
 	}
 	
 	export class DisableItemHandler implements EventStore.ICommandHandler<DisableItem>{
-		constructor(){
-			EventStore.Bus.Default.On(Inventory.DisableItem.Type, this);
+		constructor(bus: EventStore.Bus){
+			bus.On(Inventory.DisableItem.Type, this);
 		}
 		
 		Handle(command : DisableItem){
@@ -77,6 +77,14 @@ module Inventory {
 			EventStore.Repository.save(item, command.commandId, h =>{
 				h.add('ts', Date())
 			});
+		}
+	}
+	
+	export class Handlers
+	{
+		static Register(bus : EventStore.Bus){
+			new Inventory.RegisterItemHandler(bus);
+			new Inventory.DisableItemHandler(bus);
 		}
 	}
 	

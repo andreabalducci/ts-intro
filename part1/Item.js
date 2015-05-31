@@ -71,8 +71,8 @@ var Inventory;
     Inventory.DisableItem = DisableItem;
     /* handlers */
     var RegisterItemHandler = (function () {
-        function RegisterItemHandler() {
-            EventStore.Bus.Default.On(Inventory.RegisterItem.Type, this);
+        function RegisterItemHandler(bus) {
+            bus.On(Inventory.RegisterItem.Type, this);
         }
         RegisterItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.itemId);
@@ -85,8 +85,8 @@ var Inventory;
     })();
     Inventory.RegisterItemHandler = RegisterItemHandler;
     var DisableItemHandler = (function () {
-        function DisableItemHandler() {
-            EventStore.Bus.Default.On(Inventory.DisableItem.Type, this);
+        function DisableItemHandler(bus) {
+            bus.On(Inventory.DisableItem.Type, this);
         }
         DisableItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.itemId);
@@ -98,6 +98,16 @@ var Inventory;
         return DisableItemHandler;
     })();
     Inventory.DisableItemHandler = DisableItemHandler;
+    var Handlers = (function () {
+        function Handlers() {
+        }
+        Handlers.Register = function (bus) {
+            new Inventory.RegisterItemHandler(bus);
+            new Inventory.DisableItemHandler(bus);
+        };
+        return Handlers;
+    })();
+    Inventory.Handlers = Handlers;
     /* events */
     var ItemCreated = (function (_super) {
         __extends(ItemCreated, _super);
