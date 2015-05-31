@@ -34,38 +34,29 @@ var Inventory;
         ItemState.prototype.stockLevel = function () { return this.inStock; };
         return ItemState;
     })(EventStore.AggregateState);
-    var Item = (function (_super) {
-        __extends(Item, _super);
-        function Item(id) {
-            _super.call(this, id, new ItemState());
+    /* Commands */
+    var RegisterItem = (function (_super) {
+        __extends(RegisterItem, _super);
+        function RegisterItem(id, description) {
+            _super.call(this);
+            this.id = id;
+            this.description = description;
         }
-        Item.prototype.register = function (id, description) {
-            this.RaiseEvent(new ItemCreated(id, description));
+        RegisterItem.Type = new RegisterItem(null, null);
+        return RegisterItem;
+    })(EventStore.Command);
+    Inventory.RegisterItem = RegisterItem;
+    var RegisterItemHandler = (function () {
+        function RegisterItemHandler() {
+        }
+        RegisterItemHandler.prototype.Handle = function (command) {
+            debugger;
+            var item = EventStore.Repository.getById(Item.Type, command.id);
+            item.register(command.id, command.description);
         };
-        Item.prototype.disable = function () {
-            if (this.State.stockLevel() > 0) {
-                throw new ItemCannotBeDisabledError(this.State.stockLevel());
-            }
-            if (!this.State.hasBeenDisabled()) {
-                this.RaiseEvent(new ItemDisabled());
-            }
-        };
-        Item.prototype.load = function (quantity) {
-            Error();
-            this.RaiseEvent(new ItemLoaded(quantity));
-        };
-        Item.prototype.unLoad = function (quantity) {
-            var currentStock = this.State.stockLevel();
-            if (currentStock >= quantity) {
-                this.RaiseEvent(new ItemPicked(quantity));
-            }
-            else {
-                this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
-            }
-        };
-        return Item;
-    })(EventStore.Aggregate);
-    Inventory.Item = Item;
+        return RegisterItemHandler;
+    })();
+    Inventory.RegisterItemHandler = RegisterItemHandler;
     /* events */
     var ItemCreated = (function (_super) {
         __extends(ItemCreated, _super);
@@ -118,5 +109,39 @@ var Inventory;
         return ItemPickingFailed;
     })(EventStore.Event);
     Inventory.ItemPickingFailed = ItemPickingFailed;
+    /* AGGREGATE */
+    var Item = (function (_super) {
+        __extends(Item, _super);
+        function Item(id) {
+            _super.call(this, id, new ItemState());
+        }
+        Item.prototype.register = function (id, description) {
+            this.RaiseEvent(new ItemCreated(id, description));
+        };
+        Item.prototype.disable = function () {
+            if (this.State.stockLevel() > 0) {
+                throw new ItemCannotBeDisabledError(this.State.stockLevel());
+            }
+            if (!this.State.hasBeenDisabled()) {
+                this.RaiseEvent(new ItemDisabled());
+            }
+        };
+        Item.prototype.load = function (quantity) {
+            Error();
+            this.RaiseEvent(new ItemLoaded(quantity));
+        };
+        Item.prototype.unLoad = function (quantity) {
+            var currentStock = this.State.stockLevel();
+            if (currentStock >= quantity) {
+                this.RaiseEvent(new ItemPicked(quantity));
+            }
+            else {
+                this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
+            }
+        };
+        Item.Type = new Item(null);
+        return Item;
+    })(EventStore.Aggregate);
+    Inventory.Item = Item;
 })(Inventory || (Inventory = {}));
 //# sourceMappingURL=Item.js.map

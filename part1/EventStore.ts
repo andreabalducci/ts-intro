@@ -4,8 +4,8 @@ module EventStore {
 		commandId: string;
 	}
 
-	export interface ICommandHandler {
-		Handle(command: ICommand): void;
+	export interface ICommandHandler<T extends ICommand> {
+		Handle(command: T): void;
 	}
 
 	export interface IEvent {
@@ -35,19 +35,32 @@ module EventStore {
         var results = (funcNameRegex).exec((<any> o).toString());
         return (results && results.length > 1) ? results[1] : "";
 	}
-	
-	export class DomainError implements Error{
+
+	export class DomainError implements Error {
 		name: string;
-    	
-		constructor(public message ?:string){
+
+		constructor(public message?: string) {
 			this.name = getType(this);
 		}
 	}
 
+	export class Command implements ICommand {
+		static CommandCounter: number = 0;
+		commandId: string;
 
-	export class Event {
+		constructor() {
+			this.commandId = "cmd_" + Command.CommandCounter++;
+		}
+
+		GetType(): string {
+			return getType(this);
+		}
+	}
+
+
+	export class Event implements IEvent {
 		static EventCounter: number = 0;
-		static Type:Event = new Event();
+		static Type: Event = new Event();
 		streamId: string;
 		eventId: string;
 		constructor() {
@@ -83,8 +96,12 @@ module EventStore {
 			this.Handle(event);
 		}
 	}
+	
+	export interface IAggregate{
+		Factory(id:string):IAggregate;
+	}
 
-	export class Aggregate<TState extends AggregateState> {
+	export class Aggregate<TState extends AggregateState> implements IAggregate {
 		private Events: Array<IEvent> = new Array<IEvent>();
 
 		constructor(protected id: string, protected State: TState) {
@@ -97,24 +114,47 @@ module EventStore {
 			this.State.Apply(event);
 			Bus.Default.publish(event);
 		}
+		
+		public Factory(id:string){
+			throw "Factory not implemented in "+getType(this);
+			return <IAggregate>null;
+		}
 	}
 
+	export class Repository
+	{
+		static getById<T extends IAggregate>(type:T, id:string) : T{
+			return <T>type.Factory(id);
+		}
+	}
+
+
 	export class Bus implements IBus {
-		static Default: Bus = new Bus();
-		private Consumers: Array<Projection> = new Array<Projection>();
-
+		static Default = new Bus();
+		private Consumers = new Array<Projection>();
+		private Handlers = new Collections.Dictionary<ICommandHandler<ICommand>>();
+		
 		send(command: ICommand): void {
-
+			var name =getType(command);
+			var handler = this.Handlers.getValue(name);
+			if(!handler){
+				throw "missing handler for "+ name;
+			}
+			
+			handler.Handle(command);
 		}
 
 		publish(event: IEvent): void {
-			this.Consumers.forEach(function(consumer: Projection) {
-				consumer.Handle(event);
-			}, this);
+			this.Consumers.forEach(consumer=> consumer.Handle(event));
 		}
 
 		subscribe(consumer: Projection): void {
 			this.Consumers.push(consumer);
+		}
+		
+		On<T extends ICommand>(command: T, handler: ICommandHandler<T>) {
+			var name = getType(command);
+			this.Handlers.add(name, handler);
 		}
 	}
 }

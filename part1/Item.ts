@@ -23,41 +23,21 @@ module Inventory {
 		stockLevel(): number { return this.inStock; }
 	}
 
-	export class Item extends EventStore.Aggregate<ItemState> {
-		constructor(id: string) {
-			super(id, new ItemState())
-		}
-
-		register(id: string, description: string) {
-			this.RaiseEvent(new ItemCreated(id, description));
-		}
-
-		disable() {
-			if (this.State.stockLevel() > 0) {
-				throw new ItemCannotBeDisabledError(this.State.stockLevel());
-			}
-
-			if (!this.State.hasBeenDisabled()) {
-				this.RaiseEvent(new ItemDisabled());
-			}
-		}
-
-		load(quantity: number): void {
-			Error()
-			this.RaiseEvent(new ItemLoaded(quantity))
-		}
-
-		unLoad(quantity: number): void {
-			var currentStock = this.State.stockLevel();
-			if (currentStock >= quantity) {
-				this.RaiseEvent(new ItemPicked(quantity))
-			} else {
-				this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
-			}
+	/* Commands */
+	export class RegisterItem extends EventStore.Command{
+		static Type: RegisterItem = new RegisterItem(null,null);
+		constructor(public id:string, public description:string){
+			super();
 		}
 	}
-
 	
+	export class RegisterItemHandler implements EventStore.ICommandHandler<RegisterItem>{
+		Handle(command : RegisterItem){
+			debugger;
+			var item = EventStore.Repository.getById(Item.Type, command.id);
+			item.register(command.id, command.description);
+		}
+	}
 	
 	/* events */
 	export class ItemCreated extends EventStore.Event {
@@ -92,6 +72,44 @@ module Inventory {
 		static Type: ItemPickingFailed = new ItemPickingFailed(0, 0);
 		constructor(public requested: number, public inStock: number) {
 			super();
+		}
+	}
+	
+	
+	/* AGGREGATE */
+	
+	export class Item extends EventStore.Aggregate<ItemState> {
+		static Type: Item = new Item(null);
+		constructor(id: string) {
+			super(id, new ItemState())
+		}
+
+		register(id: string, description: string) {
+			this.RaiseEvent(new ItemCreated(id, description));
+		}
+
+		disable() {
+			if (this.State.stockLevel() > 0) {
+				throw new ItemCannotBeDisabledError(this.State.stockLevel());
+			}
+
+			if (!this.State.hasBeenDisabled()) {
+				this.RaiseEvent(new ItemDisabled());
+			}
+		}
+
+		load(quantity: number): void {
+			Error()
+			this.RaiseEvent(new ItemLoaded(quantity))
+		}
+
+		unLoad(quantity: number): void {
+			var currentStock = this.State.stockLevel();
+			if (currentStock >= quantity) {
+				this.RaiseEvent(new ItemPicked(quantity))
+			} else {
+				this.RaiseEvent(new ItemPickingFailed(quantity, currentStock));
+			}
 		}
 	}
 }

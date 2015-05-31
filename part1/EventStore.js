@@ -25,6 +25,17 @@ var EventStore;
         return DomainError;
     })();
     EventStore.DomainError = DomainError;
+    var Command = (function () {
+        function Command() {
+            this.commandId = "cmd_" + Command.CommandCounter++;
+        }
+        Command.prototype.GetType = function () {
+            return getType(this);
+        };
+        Command.CommandCounter = 0;
+        return Command;
+    })();
+    EventStore.Command = Command;
     var Event = (function () {
         function Event() {
             this.eventId = "evt_" + Event.EventCounter++;
@@ -80,22 +91,44 @@ var EventStore;
             this.State.Apply(event);
             Bus.Default.publish(event);
         };
+        Aggregate.prototype.Factory = function (id) {
+            throw "Factory not implemented in " + getType(this);
+            return null;
+        };
         return Aggregate;
     })();
     EventStore.Aggregate = Aggregate;
+    var Repository = (function () {
+        function Repository() {
+        }
+        Repository.getById = function (type, id) {
+            return type.Factory(id);
+        };
+        return Repository;
+    })();
+    EventStore.Repository = Repository;
     var Bus = (function () {
         function Bus() {
             this.Consumers = new Array();
+            this.Handlers = new Collections.Dictionary();
         }
         Bus.prototype.send = function (command) {
+            var name = getType(command);
+            var handler = this.Handlers.getValue(name);
+            if (!handler) {
+                throw "missing handler for " + name;
+            }
+            handler.Handle(command);
         };
         Bus.prototype.publish = function (event) {
-            this.Consumers.forEach(function (consumer) {
-                consumer.Handle(event);
-            }, this);
+            this.Consumers.forEach(function (consumer) { return consumer.Handle(event); });
         };
         Bus.prototype.subscribe = function (consumer) {
             this.Consumers.push(consumer);
+        };
+        Bus.prototype.On = function (command, handler) {
+            var name = getType(command);
+            this.Handlers.add(name, handler);
         };
         Bus.Default = new Bus();
         return Bus;
