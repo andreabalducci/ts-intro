@@ -27,6 +27,7 @@ var Program;
             this.On(EventStore.Event.Type, function (e) {
                 console.log('generic handler for ', e);
             });
+            EventStore.Bus.Default.subscribe(this);
         }
         ItemsList.prototype.print = function () {
             console.log("----------------------------");
@@ -40,10 +41,8 @@ var Program;
     var itemsList = new ItemsList();
     function configure() {
         /* Handlers setup */
-        EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
-        EventStore.Bus.Default.On(Inventory.DisableItem.Type, new Inventory.DisableItemHandler());
-        /* eventstream subscriptions */
-        EventStore.Bus.Default.subscribe(itemsList);
+        new Inventory.RegisterItemHandler();
+        new Inventory.DisableItemHandler();
     }
     function run() {
         EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));

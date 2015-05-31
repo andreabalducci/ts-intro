@@ -29,6 +29,8 @@ module Program {
 			this.On(EventStore.Event.Type, e => {
 				console.log('generic handler for ', e);
 			})
+			
+			EventStore.Bus.Default.subscribe(this);
 		}
 
 		print() {
@@ -44,11 +46,8 @@ module Program {
 
 	function configure(){
 		/* Handlers setup */
-		EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
-		EventStore.Bus.Default.On(Inventory.DisableItem.Type, new Inventory.DisableItemHandler());
-
-		/* eventstream subscriptions */
-		EventStore.Bus.Default.subscribe(itemsList);
+		new Inventory.RegisterItemHandler();
+		new Inventory.DisableItemHandler();
 	}
 
 	function run(){

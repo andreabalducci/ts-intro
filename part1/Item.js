@@ -72,6 +72,7 @@ var Inventory;
     /* handlers */
     var RegisterItemHandler = (function () {
         function RegisterItemHandler() {
+            EventStore.Bus.Default.On(Inventory.RegisterItem.Type, this);
         }
         RegisterItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.itemId);
@@ -85,6 +86,7 @@ var Inventory;
     Inventory.RegisterItemHandler = RegisterItemHandler;
     var DisableItemHandler = (function () {
         function DisableItemHandler() {
+            EventStore.Bus.Default.On(Inventory.DisableItem.Type, this);
         }
         DisableItemHandler.prototype.Handle = function (command) {
             var item = EventStore.Repository.getById(Item.Type, command.itemId);
