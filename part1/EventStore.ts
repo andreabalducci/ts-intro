@@ -1,3 +1,4 @@
+/// <reference path="Collections.ts"/>
 module EventStore {
 	/* Interfaces */
 	export interface ICommand {
@@ -222,14 +223,20 @@ module EventStore {
 			var id = aggregate.getAggregateId();
 			var type = aggregate.getAggregateType();
 			console.log('saving ' + type + "[" + id + "]");
+			
+			// it's ok to save? 
 			aggregate.checkInvariants();
 			
-			// TODO save on stream
+			// save on stream
 			var stream = Repository.Persistence.openStream(id);
 			stream.commit(aggregate.getUncommitedEvents(), commitId, h=>{
 				h.add('type', type);
+				if(prepareHeaders){
+					prepareHeaders(h);
+				}
 			});
-
+			
+			// dispatch events to subscribers
 			aggregate.getUncommitedEvents().forEach(e=> {
 				Bus.Default.publish(e);
 			});

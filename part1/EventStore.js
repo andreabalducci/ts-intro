@@ -4,6 +4,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+/// <reference path="Collections.ts"/>
 var EventStore;
 (function (EventStore) {
     /* Implementations */
@@ -177,12 +178,17 @@ var EventStore;
             var id = aggregate.getAggregateId();
             var type = aggregate.getAggregateType();
             console.log('saving ' + type + "[" + id + "]");
+            // it's ok to save? 
             aggregate.checkInvariants();
-            // TODO save on stream
+            // save on stream
             var stream = Repository.Persistence.openStream(id);
             stream.commit(aggregate.getUncommitedEvents(), commitId, function (h) {
                 h.add('type', type);
+                if (prepareHeaders) {
+                    prepareHeaders(h);
+                }
             });
+            // dispatch events to subscribers
             aggregate.getUncommitedEvents().forEach(function (e) {
                 Bus.Default.publish(e);
             });

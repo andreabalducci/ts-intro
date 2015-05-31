@@ -41,32 +41,61 @@ var Inventory;
     /* Commands */
     var RegisterItem = (function (_super) {
         __extends(RegisterItem, _super);
-        function RegisterItem(id, description) {
+        function RegisterItem(itemId, sku, description) {
             _super.call(this);
-            this.id = id;
+            this.itemId = itemId;
+            this.sku = sku;
             this.description = description;
+            this.__registerItem = null;
         }
-        RegisterItem.Type = new RegisterItem(null, null);
+        RegisterItem.Type = new RegisterItem(null, null, null);
         return RegisterItem;
     })(EventStore.Command);
     Inventory.RegisterItem = RegisterItem;
+    var DisableItem = (function (_super) {
+        __extends(DisableItem, _super);
+        function DisableItem(itemId) {
+            _super.call(this);
+            this.itemId = itemId;
+            this.__disableItem = null;
+        }
+        DisableItem.Type = new DisableItem(null);
+        return DisableItem;
+    })(EventStore.Command);
+    Inventory.DisableItem = DisableItem;
+    /* handlers */
     var RegisterItemHandler = (function () {
         function RegisterItemHandler() {
         }
         RegisterItemHandler.prototype.Handle = function (command) {
-            var item = EventStore.Repository.getById(Item.Type, command.id);
-            item.register(command.id, command.description);
-            EventStore.Repository.save(item, command.commandId);
+            var item = EventStore.Repository.getById(Item.Type, command.itemId);
+            item.register(command.sku, command.description);
+            EventStore.Repository.save(item, command.commandId, function (h) {
+                h.add('ts', Date());
+            });
         };
         return RegisterItemHandler;
     })();
     Inventory.RegisterItemHandler = RegisterItemHandler;
+    var DisableItemHandler = (function () {
+        function DisableItemHandler() {
+        }
+        DisableItemHandler.prototype.Handle = function (command) {
+            var item = EventStore.Repository.getById(Item.Type, command.itemId);
+            item.disable();
+            EventStore.Repository.save(item, command.commandId, function (h) {
+                h.add('ts', Date());
+            });
+        };
+        return DisableItemHandler;
+    })();
+    Inventory.DisableItemHandler = DisableItemHandler;
     /* events */
     var ItemCreated = (function (_super) {
         __extends(ItemCreated, _super);
-        function ItemCreated(id, description) {
+        function ItemCreated(sku, description) {
             _super.call(this);
-            this.id = id;
+            this.sku = sku;
             this.description = description;
         }
         ItemCreated.Type = new ItemCreated(null, null);

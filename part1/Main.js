@@ -16,7 +16,7 @@ var Program;
             this.allItems = new Collections.Dictionary();
             this.On(Inventory.ItemCreated.Type, function (e) {
                 _this.allItems.add(e.streamId, {
-                    id: e.id,
+                    id: e.sku,
                     description: e.description,
                     active: true
                 });
@@ -56,7 +56,7 @@ var Program;
     //
     //	var iphone = new Inventory.Item('2');
     //	iphone.register('iphone', 'Iphone 5');
-    EventStore.Bus.Default.send(new Inventory.RegisterItem("abc", "a new item"));
+    EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
     itemsList.print();
 })(Program || (Program = {}));
 //# sourceMappingURL=Main.js.map

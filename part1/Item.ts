@@ -29,24 +29,46 @@ module Inventory {
 
 	/* Commands */
 	export class RegisterItem extends EventStore.Command{
-		static Type: RegisterItem = new RegisterItem(null,null);
-		constructor(public id:string, public description:string){
+		static Type: RegisterItem = new RegisterItem(null,null,null);
+		__registerItem = null;
+		constructor(public itemId:string, public sku:string, public description:string){
 			super();
 		}
 	}
 	
+	export class DisableItem extends EventStore.Command{
+		static Type: DisableItem = new DisableItem(null);
+		__disableItem = null;
+		constructor(public itemId:string){
+			super();
+		}
+	}
+	
+	/* handlers */
 	export class RegisterItemHandler implements EventStore.ICommandHandler<RegisterItem>{
 		Handle(command : RegisterItem){
-			var item = EventStore.Repository.getById(Item.Type, command.id);
-			item.register(command.id, command.description);
-			EventStore.Repository.save(item, command.commandId);
+			var item = EventStore.Repository.getById(Item.Type, command.itemId);
+			item.register(command.sku, command.description);
+			EventStore.Repository.save(item, command.commandId, h =>{
+				h.add('ts', Date())
+			});
+		}
+	}
+	
+	export class DisableItemHandler implements EventStore.ICommandHandler<DisableItem>{
+		Handle(command : DisableItem){
+			var item = EventStore.Repository.getById(Item.Type, command.itemId);
+			item.disable();
+			EventStore.Repository.save(item, command.commandId, h =>{
+				h.add('ts', Date())
+			});
 		}
 	}
 	
 	/* events */
 	export class ItemCreated extends EventStore.Event {
 		static Type: ItemCreated = new ItemCreated(null, null);
-		constructor(public id: string, public description: string) {
+		constructor(public sku: string, public description: string) {
 			super();
 		}
 	}

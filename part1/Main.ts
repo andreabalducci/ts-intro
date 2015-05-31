@@ -16,7 +16,7 @@ module Program {
 
 			this.On(Inventory.ItemCreated.Type, e => {
 				this.allItems.add(e.streamId, {
-					id: e.id,
+					id: e.sku,
 					description: e.description,
 					active: true
 				});
@@ -62,7 +62,7 @@ module Program {
 //	var iphone = new Inventory.Item('2');
 //	iphone.register('iphone', 'Iphone 5');
 
-	EventStore.Bus.Default.send(new Inventory.RegisterItem("abc","a new item"));
+	EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1","abc","a new item"));
 
 
 	itemsList.print();
