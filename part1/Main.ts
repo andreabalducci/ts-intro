@@ -6,6 +6,7 @@ module Program {
 		id: string;
 		description: string;
 		active: boolean;
+		inStock: number;
 	}
 
 	class ItemsList extends EventStore.Projection {
@@ -18,7 +19,8 @@ module Program {
 				this.allItems.add(e.streamId, {
 					id: e.sku,
 					description: e.description,
-					active: true
+					active: true,
+					inStock: 0
 				});
 			});
 
@@ -29,6 +31,10 @@ module Program {
 			this.On(EventStore.Event.Type, e => {
 				console.log('generic handler for ', e);
 			})
+
+			this.On(Inventory.ItemLoaded.Type, e=> this.allItems.getValue(e.streamId).inStock += e.quantity);
+			this.On(Inventory.ItemPicked.Type, e=> this.allItems.getValue(e.streamId).inStock -= e.quantity);
+
 
 		}
 
@@ -51,8 +57,14 @@ module Program {
 	}
 
 	function run() {
-		bus.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
-		bus.send(new Inventory.DisableItem("item_1"));
+		try {
+			bus.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
+			bus.send(new Inventory.LoadItem("item_1", 100));
+			bus.send(new Inventory.PickItem("item_1", 69));
+			bus.send(new Inventory.DisableItem("item_1"));
+		} catch (error) {
+			console.error(error.message);
+		}
 		itemsList.print();
 	}
 

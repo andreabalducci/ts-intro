@@ -18,7 +18,8 @@ var Program;
                 _this.allItems.add(e.streamId, {
                     id: e.sku,
                     description: e.description,
-                    active: true
+                    active: true,
+                    inStock: 0
                 });
             });
             this.On(Inventory.ItemDisabled.Type, function (e) {
@@ -27,6 +28,8 @@ var Program;
             this.On(EventStore.Event.Type, function (e) {
                 console.log('generic handler for ', e);
             });
+            this.On(Inventory.ItemLoaded.Type, function (e) { return _this.allItems.getValue(e.streamId).inStock += e.quantity; });
+            this.On(Inventory.ItemPicked.Type, function (e) { return _this.allItems.getValue(e.streamId).inStock -= e.quantity; });
         }
         ItemsList.prototype.print = function () {
             console.log("----------------------------");
@@ -45,8 +48,15 @@ var Program;
         bus.subscribe(itemsList);
     }
     function run() {
-        bus.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
-        bus.send(new Inventory.DisableItem("item_1"));
+        try {
+            bus.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
+            bus.send(new Inventory.LoadItem("item_1", 100));
+            bus.send(new Inventory.PickItem("item_1", 69));
+            bus.send(new Inventory.DisableItem("item_1"));
+        }
+        catch (error) {
+            console.error(error.message);
+        }
         itemsList.print();
     }
     configure();

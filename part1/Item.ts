@@ -1,12 +1,5 @@
 /// <reference path="EventStore.ts"/>
 module Inventory {
-	/* ERRORS */
-	export class ItemCannotBeDisabledError extends EventStore.DomainError {
-		constructor(public inStock:number){
-			super("In stock " + inStock);
-		}
-	}
-
 	/* state & aggregate */
 
 	class ItemState extends EventStore.AggregateState  {
@@ -51,6 +44,22 @@ module Inventory {
 		}
 	}
 	
+	export class LoadItem extends EventStore.Command{
+		static Type: LoadItem = new LoadItem(null,0);
+		__loadItem = null;
+		constructor(public itemId:string, public quantity: number){
+			super();
+		}
+	}
+	
+	export class PickItem extends EventStore.Command{
+		static Type: PickItem = new PickItem(null,0);
+		__loadItem = null;
+		constructor(public itemId:string, public quantity: number){
+			super();
+		}
+	}
+	
 	/* handlers */
 	export class RegisterItemHandler implements EventStore.ICommandHandler<RegisterItem>{
 		constructor(bus: EventStore.Bus){
@@ -80,11 +89,37 @@ module Inventory {
 		}
 	}
 	
+	export class LoadItemHandler implements EventStore.ICommandHandler<LoadItem>{
+		constructor(bus: EventStore.Bus){
+			bus.On(Inventory.LoadItem.Type, this);
+		}
+		
+		Handle(command : LoadItem){
+			var item = EventStore.Repository.getById(Item.Type, command.itemId);
+			item.load(command.quantity);
+			EventStore.Repository.save(item, command.commandId);
+		}
+	}
+	
+	export class PickItemHandler implements EventStore.ICommandHandler<PickItem>{
+		constructor(bus: EventStore.Bus){
+			bus.On(Inventory.PickItem.Type, this);
+		}
+		
+		Handle(command : PickItem){
+			var item = EventStore.Repository.getById(Item.Type, command.itemId);
+			item.unLoad(command.quantity);
+			EventStore.Repository.save(item, command.commandId);
+		}
+	}
+	
 	export class Handlers
 	{
 		static Register(bus : EventStore.Bus){
 			new Inventory.RegisterItemHandler(bus);
 			new Inventory.DisableItemHandler(bus);
+			new Inventory.LoadItemHandler(bus);
+			new Inventory.PickItemHandler(bus);
 		}
 	}
 	
@@ -138,10 +173,6 @@ module Inventory {
 		}
 
 		disable() {
-			if (this.State.stockLevel() > 0) {
-				throw new ItemCannotBeDisabledError(this.State.stockLevel());
-			}
-
 			if (!this.State.hasBeenDisabled()) {
 				this.RaiseEvent(new ItemDisabled());
 			}

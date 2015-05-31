@@ -7,16 +7,6 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="EventStore.ts"/>
 var Inventory;
 (function (Inventory) {
-    /* ERRORS */
-    var ItemCannotBeDisabledError = (function (_super) {
-        __extends(ItemCannotBeDisabledError, _super);
-        function ItemCannotBeDisabledError(inStock) {
-            _super.call(this, "In stock " + inStock);
-            this.inStock = inStock;
-        }
-        return ItemCannotBeDisabledError;
-    })(EventStore.DomainError);
-    Inventory.ItemCannotBeDisabledError = ItemCannotBeDisabledError;
     /* state & aggregate */
     var ItemState = (function (_super) {
         __extends(ItemState, _super);
@@ -69,6 +59,30 @@ var Inventory;
         return DisableItem;
     })(EventStore.Command);
     Inventory.DisableItem = DisableItem;
+    var LoadItem = (function (_super) {
+        __extends(LoadItem, _super);
+        function LoadItem(itemId, quantity) {
+            _super.call(this);
+            this.itemId = itemId;
+            this.quantity = quantity;
+            this.__loadItem = null;
+        }
+        LoadItem.Type = new LoadItem(null, 0);
+        return LoadItem;
+    })(EventStore.Command);
+    Inventory.LoadItem = LoadItem;
+    var PickItem = (function (_super) {
+        __extends(PickItem, _super);
+        function PickItem(itemId, quantity) {
+            _super.call(this);
+            this.itemId = itemId;
+            this.quantity = quantity;
+            this.__loadItem = null;
+        }
+        PickItem.Type = new PickItem(null, 0);
+        return PickItem;
+    })(EventStore.Command);
+    Inventory.PickItem = PickItem;
     /* handlers */
     var RegisterItemHandler = (function () {
         function RegisterItemHandler(bus) {
@@ -98,12 +112,38 @@ var Inventory;
         return DisableItemHandler;
     })();
     Inventory.DisableItemHandler = DisableItemHandler;
+    var LoadItemHandler = (function () {
+        function LoadItemHandler(bus) {
+            bus.On(Inventory.LoadItem.Type, this);
+        }
+        LoadItemHandler.prototype.Handle = function (command) {
+            var item = EventStore.Repository.getById(Item.Type, command.itemId);
+            item.load(command.quantity);
+            EventStore.Repository.save(item, command.commandId);
+        };
+        return LoadItemHandler;
+    })();
+    Inventory.LoadItemHandler = LoadItemHandler;
+    var PickItemHandler = (function () {
+        function PickItemHandler(bus) {
+            bus.On(Inventory.PickItem.Type, this);
+        }
+        PickItemHandler.prototype.Handle = function (command) {
+            var item = EventStore.Repository.getById(Item.Type, command.itemId);
+            item.unLoad(command.quantity);
+            EventStore.Repository.save(item, command.commandId);
+        };
+        return PickItemHandler;
+    })();
+    Inventory.PickItemHandler = PickItemHandler;
     var Handlers = (function () {
         function Handlers() {
         }
         Handlers.Register = function (bus) {
             new Inventory.RegisterItemHandler(bus);
             new Inventory.DisableItemHandler(bus);
+            new Inventory.LoadItemHandler(bus);
+            new Inventory.PickItemHandler(bus);
         };
         return Handlers;
     })();
@@ -170,9 +210,6 @@ var Inventory;
             this.RaiseEvent(new ItemCreated(id, description));
         };
         Item.prototype.disable = function () {
-            if (this.State.stockLevel() > 0) {
-                throw new ItemCannotBeDisabledError(this.State.stockLevel());
-            }
             if (!this.State.hasBeenDisabled()) {
                 this.RaiseEvent(new ItemDisabled());
             }
