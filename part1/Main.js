@@ -38,28 +38,20 @@ var Program;
         return ItemsList;
     })(EventStore.Projection);
     var itemsList = new ItemsList();
-    EventStore.Bus.Default.subscribe(itemsList);
-    EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
-    EventStore.Bus.Default.On(Inventory.DisableItem.Type, new Inventory.DisableItemHandler());
-    //	var macbook = new Inventory.Item('1');
-    //	macbook.register('mbp', 'macbook pro');
-    //	macbook.load(10);
-    //	macbook.unLoad(4);
-    //	macbook.unLoad(8);
-    //	try {
-    //		macbook.disable();
-    //	} catch (err) {
-    //		if (err instanceof Inventory.ItemCannotBeDisabledError) {
-    //			console.error('Still available:', (<Inventory.ItemCannotBeDisabledError>err).inStock);
-    //		}
-    //	}
-    //
-    //
-    //	var iphone = new Inventory.Item('2');
-    //	iphone.register('iphone', 'Iphone 5');
-    EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
-    EventStore.Bus.Default.send(new Inventory.DisableItem("item_1"));
-    itemsList.print();
+    function configure() {
+        /* Handlers setup */
+        EventStore.Bus.Default.On(Inventory.RegisterItem.Type, new Inventory.RegisterItemHandler());
+        EventStore.Bus.Default.On(Inventory.DisableItem.Type, new Inventory.DisableItemHandler());
+        /* eventstream subscriptions */
+        EventStore.Bus.Default.subscribe(itemsList);
+    }
+    function run() {
+        EventStore.Bus.Default.send(new Inventory.RegisterItem("item_1", "abc", "a new item"));
+        EventStore.Bus.Default.send(new Inventory.DisableItem("item_1"));
+        itemsList.print();
+    }
+    configure();
+    run();
     EventStore.Persistence.dump();
 })(Program || (Program = {}));
 //# sourceMappingURL=Main.js.map
