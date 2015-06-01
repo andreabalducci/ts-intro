@@ -102,14 +102,14 @@ module EventStore {
 		}
 	}
 
-	interface IAggregate {
+	export interface IAggregate {
 		getAggregateType(): string;
 		getAggregateId(): string;
 		getUncommitedEvents(): IEvent[];
 		checkInvariants();
 	}
 
-	interface InvariantCheck {
+	export interface InvariantCheck {
 		name: string;
 		rule<T extends AggregateState>(): Boolean;
 	}
@@ -170,13 +170,13 @@ module EventStore {
 		}
 	}
 
-	interface ICommit {
+	export interface ICommit {
 		commitId: string;
 		events: IEvent[];
 		headers: Collections.IDictionary<string>
 	};
 
-	class Stream {
+	export class Stream {
 		private commits = new Array<ICommit>();
 		private events = new Array<IEvent>();
 		

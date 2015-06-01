@@ -1,8 +1,8 @@
-/// <reference path="EventStore.ts"/>
+/// <reference path="../EventStore/EventStore.ts"/>
 module Inventory {
 	/* state & aggregate */
 
-	class ItemState extends EventStore.AggregateState  {
+	export class ItemState extends EventStore.AggregateState  {
 		private disabled: boolean = false;
 		private inStock: number = 0;
 		private sku:string = null;
