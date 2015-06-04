@@ -1,24 +1,6 @@
-module demo {
-
-	interface IJedi {
-		name: string;
-	}
-
-	interface IPrincess {
-		name: string
-	}
-	
-	class Jedi implements IJedi{
-		constructor(public name:string, public bio:string){
-			
-		}
-	}	
-	
-	class Princess implements IPrincess{
-		constructor(public name:string, public bio:string){
-			
-		}
-	}
+/// <reference path="jedi.ts"/>
+/// <reference path="princess.ts"/>
+module StarWars {
 
 	function hello(who: {name:string}) {
 		console.log("Hello " + who.name + "!");

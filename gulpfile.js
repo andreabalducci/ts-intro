@@ -12,9 +12,9 @@ var tsProject = plugins.typescript.createProject({
 });
 
 var config = {
-  hello:{
-    src :'src/intro/'    
-  }  
+    hello: {
+        src: 'src/intro/'
+    }
 };
 
 var paths = {
@@ -25,15 +25,16 @@ var paths = {
 
 gulp.task('build-hello', function () {
     var tsResult = gulp
-        .src(config.hello.src+"**/*.ts")
+        .src(config.hello.src + "**/*.ts")
         .pipe(plugins.typescript(tsProject));
 
     return tsResult.js
-            .pipe(gulp.dest(paths.build))
+        .pipe(plugins.concat('hello.js'))
+        .pipe(gulp.dest(paths.build))
 });
 
-gulp.task('run-hello', ['build-hello'],function(){
-        exec('node ./build/hello.js', function (err, stdout, stderr) {
+gulp.task('run-hello', ['build-hello'], function () {
+    exec('node ./build/hello.js', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
     });
