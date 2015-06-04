@@ -6,6 +6,7 @@ module StarWars {
 		console.log("Hello " + who.name + "!");
 		if (who instanceof Jedi) {
 			console.log("   may the force be with you!")
+			who.useTheForce();
 		}
 	}
 	
@@ -28,11 +29,13 @@ module StarWars {
 	// Destructuring
 	var [leia, luke, yoda] = characters;
 
+	console.log("- - - - - - - - - - -");
+
 	hello(yoda);
 	hello(leia);
 	hello(luke);
 
-	console.log(" - - - - - - - - - -");
+	console.log("- - - - - - - - - - -");
 
 	// for ... of ... 
 	for (var c of characters) {

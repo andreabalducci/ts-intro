@@ -11,6 +11,14 @@ var tsProject = plugins.typescript.createProject({
     typescript: require('typescript')
 });
 
+var tsDemo = plugins.typescript.createProject({
+    target:'ES5',
+    declarationFiles: true,
+    noExternalResolve: false,
+    sortOutput: true,
+    typescript: require('typescript')
+});
+
 var config = {
     hello: {
         src: 'src/intro/'
@@ -26,7 +34,7 @@ var paths = {
 gulp.task('build-hello', function () {
     var tsResult = gulp
         .src(config.hello.src + "**/*.ts")
-        .pipe(plugins.typescript(tsProject));
+        .pipe(plugins.typescript(tsDemo));
 
     return tsResult.js
         .pipe(plugins.concat('hello.js'))
