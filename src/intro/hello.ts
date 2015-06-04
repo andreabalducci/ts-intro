@@ -2,25 +2,40 @@
 /// <reference path="princess.ts"/>
 module StarWars {
 
-	function hello(who: {name:string}) {
+	function hello(who: { name: string }) {
 		console.log("Hello " + who.name + "!");
-		if(who instanceof Jedi){
+		if (who instanceof Jedi) {
 			console.log("   may the force be with you!")
 		}
 	}
-
-	var leia = new Princess(
-		'Leia Organa Solo',
-		'http://starwars.wikia.com/wiki/Leia_Organa_Solo'
-	);
 	
-	var luke  = new Jedi(
-		'Luke Skywalker',
-		'http://starwars.wikia.com/wiki/Luke_Skywalker'
-	);
+	// LET
+	let characters = [
+		new Princess(
+			'Leia Organa Solo',
+			'http://starwars.wikia.com/wiki/Leia_Organa_Solo'
+			),
+		new Jedi(
+			'Luke Skywalker',
+			'http://starwars.wikia.com/wiki/Luke_Skywalker'
+			),
+		{
+			name: "Yoda",
+			bio: "one of the most renowned and powerful Jedi in galactic history"
+		}
+	];
 
+	// Destructuring
+	var [leia, luke, yoda] = characters;
 
-	hello({ name: "Yoda", bio:"one of the most renowned and powerful Jedi in galactic history" });
+	hello(yoda);
 	hello(leia);
 	hello(luke);
+
+	console.log(" - - - - - - - - - -");
+
+	// for ... of ... 
+	for (var c of characters) {
+		console.log(c);
+	}
 }

@@ -32,9 +32,23 @@ var StarWars;
             console.log("   may the force be with you!");
         }
     }
-    var leia = new StarWars.Princess('Leia Organa Solo', 'http://starwars.wikia.com/wiki/Leia_Organa_Solo');
-    var luke = new StarWars.Jedi('Luke Skywalker', 'http://starwars.wikia.com/wiki/Luke_Skywalker');
-    hello({ name: "Yoda", bio: "one of the most renowned and powerful Jedi in galactic history" });
+    // LET
+    var characters = [
+        new StarWars.Princess('Leia Organa Solo', 'http://starwars.wikia.com/wiki/Leia_Organa_Solo'),
+        new StarWars.Jedi('Luke Skywalker', 'http://starwars.wikia.com/wiki/Luke_Skywalker'),
+        {
+            name: "Yoda",
+            bio: "one of the most renowned and powerful Jedi in galactic history"
+        }
+    ];
+    // Destructuring
+    var leia = characters[0], luke = characters[1], yoda = characters[2];
+    hello(yoda);
     hello(leia);
     hello(luke);
+    console.log(" - - - - - - - - - -");
+    for (var _i = 0; _i < characters.length; _i++) {
+        var c = characters[_i];
+        console.log(c);
+    }
 })(StarWars || (StarWars = {}));
