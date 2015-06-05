@@ -3,6 +3,7 @@ Typescript intro, sample for https://www.eventbrite.com/e/introduzione-a-typescr
 
 ## Prerequisites
 ##### NodeJs (https://nodejs.org)
+Download for your platform
 
 ##### Bower (http://bower.io)
 npm install -g bower
