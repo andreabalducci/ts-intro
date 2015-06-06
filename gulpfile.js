@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var merge = require('merge2');
 var exec = require('child_process').exec;
-
+var mainBowerFiles = require('main-bower-files');
 var plugins = require('gulp-load-plugins')();
 
 var tsProject = plugins.typescript.createProject({
@@ -24,10 +24,6 @@ var helloConfig = {
     dest: 'build/intro/'
 };
 
-var swdbConfig = {
-    src: 'src/swdb/',
-    dest: 'build/swdb/'
-};
 
 var paths = {
     scripts: 'src/**/*.ts',
@@ -71,11 +67,23 @@ gulp.task('scripts', function () {
 
 
 
-gulp.task('build-swdb', function(){
-    gulp.src(swdbConfig.src+'/**/*.html')
-        .pipe(gulp.dest(swdbConfig.dest));
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+var swdbConfig = {
+    src: 'src/swdb/',
+    dest: 'build/swdb/',
+    libs: 'build/swdb/app/libs/'
+};
+
+gulp.task('bower-files', function(){
+   return gulp  .src(mainBowerFiles())
+                .pipe(gulp.dest(swdbConfig.libs)); 
 });
 
+gulp.task('build-swdb', ['bower-files'], function(){
+    return gulp .src(swdbConfig.src+'/**/*.html')
+                .pipe(gulp.dest(swdbConfig.dest));
+});
 
 gulp.task('watch', ['scripts'], function () {
     gulp.watch(paths.scripts, ['scripts']);
