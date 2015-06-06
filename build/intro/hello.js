@@ -1,7 +1,7 @@
 var StarWars;
 (function (StarWars) {
     function inspect(target, key, descriptor) {
-        //		console.log(`inspection\ntarget:${target}\n${key}`);
+        //console.log(`inspection\ntarget:${target}\n${key}`);
         var original = descriptor.value;
         descriptor.value = function () {
             console.log(' ');
@@ -10,6 +10,7 @@ var StarWars;
             console.log('The Force will be with you, always');
             console.log(' ');
         };
+        return descriptor;
     }
     StarWars.inspect = inspect;
 })(StarWars || (StarWars = {}));
@@ -67,15 +68,15 @@ var StarWars;
     }
     // LET
     var characters = [
-        new StarWars.Princess('Leia Organa Solo', 'http://starwars.wikia.com/wiki/Leia_Organa_Solo'),
         new StarWars.Jedi('Luke Skywalker', 'http://starwars.wikia.com/wiki/Luke_Skywalker'),
+        new StarWars.Princess('Leia Organa Solo', 'http://starwars.wikia.com/wiki/Leia_Organa_Solo'),
         {
             name: "Yoda",
             bio: "one of the most renowned and powerful Jedi in galactic history"
         }
     ];
     // Destructuring
-    var leia = characters[0], luke = characters[1], yoda = characters[2];
+    var luke = characters[0], leia = characters[1], yoda = characters[2];
     console.log("- - - - - - - - - - -");
     hello(yoda);
     hello(leia);

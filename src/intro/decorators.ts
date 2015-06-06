@@ -1,6 +1,6 @@
 module StarWars {
 	export function inspect(target, key, descriptor) {
-		//		console.log(`inspection\ntarget:${target}\n${key}`);
+		//console.log(`inspection\ntarget:${target}\n${key}`);
 		
 		var original = descriptor.value;
 		descriptor.value = function() {
@@ -10,5 +10,6 @@ module StarWars {
 			console.log('The Force will be with you, always');
 			console.log(' ')
 		}
+		return descriptor;
 	}
 }

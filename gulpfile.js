@@ -19,10 +19,14 @@ var tsDemo = plugins.typescript.createProject({
     typescript: require('typescript')
 });
 
-var config = {
-    hello: {
-        src: 'src/intro/'
-    }
+var helloConfig = {
+    src: 'src/intro/',
+    dest: 'build/intro/'
+};
+
+var swdbConfig = {
+    src: 'src/swdb/',
+    dest: 'build/swdb/'
 };
 
 var paths = {
@@ -31,18 +35,19 @@ var paths = {
     definitions: 'typings/'
 };
 
+
 gulp.task('build-hello', function () {
     var tsResult = gulp
-        .src(config.hello.src + "**/*.ts")
+        .src(helloConfig.src + "**/*.ts")
         .pipe(plugins.typescript(tsDemo));
 
     return tsResult.js
         .pipe(plugins.concat('hello.js'))
-        .pipe(gulp.dest(paths.build))
+        .pipe(gulp.dest(helloConfig.dest));
 });
 
 gulp.task('run-hello', ['build-hello'], function () {
-    exec('node ./build/hello.js', function (err, stdout, stderr) {
+    exec('node ./build/intro/hello.js', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
     });
@@ -63,6 +68,14 @@ gulp.task('scripts', function () {
             .pipe(gulp.dest(paths.build))
     ]);
 });
+
+
+
+gulp.task('build-swdb', function(){
+    gulp.src(swdbConfig.src+'/**/*.html')
+        .pipe(gulp.dest(swdbConfig.dest));
+});
+
 
 gulp.task('watch', ['scripts'], function () {
     gulp.watch(paths.scripts, ['scripts']);

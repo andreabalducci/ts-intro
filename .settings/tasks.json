@@ -7,7 +7,8 @@
     ],
     "tasks": [
         {
-            "taskName": "run-hello",
+            "taskName": "build-swdb",
+         //   "taskName": "run-hello",
             "args": [],
             "isBuildCommand": true,
             "isWatching": false,

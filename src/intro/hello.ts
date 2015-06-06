@@ -1,8 +1,9 @@
 /// <reference path="jedi.ts"/>
 /// <reference path="princess.ts"/>
+
 module StarWars {
 
-	function hello(who: { name: string }) {
+	function hello(who: {name:string}) {
 		console.log("Hello " + who.name + "!");
 		if (who instanceof Jedi) {
 			console.log("   may the force be with you!")
@@ -12,13 +13,13 @@ module StarWars {
 	
 	// LET
 	let characters = [
-		new Princess(
-			'Leia Organa Solo',
-			'http://starwars.wikia.com/wiki/Leia_Organa_Solo'
-			),
 		new Jedi(
 			'Luke Skywalker',
 			'http://starwars.wikia.com/wiki/Luke_Skywalker'
+			), 
+		new Princess(
+			'Leia Organa Solo',
+			'http://starwars.wikia.com/wiki/Leia_Organa_Solo'
 			),
 		{
 			name: "Yoda",
@@ -27,7 +28,7 @@ module StarWars {
 	];
 
 	// Destructuring
-	var [leia, luke, yoda] = characters;
+	var [luke, leia, yoda] = characters;
 
 	console.log("- - - - - - - - - - -");
 

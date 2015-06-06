@@ -1,0 +1,20 @@
+{
+  "name": "ts-intro",
+  "version": "0.0.0",
+  "homepage": "https://github.com/andreabalducci/ts-intro",
+  "authors": [
+    "Andea Balducci <mtb.snowboard@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angularjs": "~1.4.0",
+    "bootstrap": "~3.3.4"
+  }
+}
