@@ -1,0 +1,3 @@
+var appname = 'appname';
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFwcC9tYWluLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLElBQUksT0FBTyxHQUFHLFNBQVMsQ0FBQyIsImZpbGUiOiJhcHAvbWFpbi5qcyIsInNvdXJjZXNDb250ZW50IjpbInZhciBhcHBuYW1lID0gJ2FwcG5hbWUnOyJdLCJzb3VyY2VSb290IjoiL3NvdXJjZS8ifQ==

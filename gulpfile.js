@@ -49,31 +49,39 @@ gulp.task('run-hello', ['build-hello'], function () {
     });
 });
 
-gulp.task('scripts', function () {
-    var tsResult = gulp
-        .src(paths.scripts)
-        .pipe(plugins.sourcemaps.init())
-        .pipe(plugins.typescript(tsProject));
-
-    return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
-        tsResult.dts
-            .pipe(gulp.dest(paths.definitions)),
-        tsResult.js
-            .pipe(plugins.concat('app.js'))
-            .pipe(plugins.sourcemaps.write())
-            .pipe(gulp.dest(paths.build))
-    ]);
-});
-
-
-
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 var swdbConfig = {
     src: 'src/swdb/',
     dest: 'build/swdb/',
-    libs: 'build/swdb/app/libs/'
+    libs: 'build/swdb/app/libs/',
+    definitions: 'typings/'
 };
+
+var tsStarWars = plugins.typescript.createProject({
+    target: 'ES5',
+    declarationFiles: true,
+    noExternalResolve: false,
+    sortOutput: true,
+    typescript: require('typescript')
+});
+
+gulp.task('ts-files', function () {
+    var tsResult = gulp
+        .src(swdbConfig.src + '**/*.ts')
+        .pipe(plugins.sourcemaps.init())
+        .pipe(plugins.typescript(tsStarWars));
+
+    return merge([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
+        tsResult.dts
+            .pipe(gulp.dest(swdbConfig.definitions)),
+        tsResult.js
+            .pipe(plugins.sourcemaps.write())
+            .pipe(gulp.dest(swdbConfig.dest))
+    ]);
+});
+
+
 
 gulp.task('bower-files', function () {
     var bower = mainBowerFiles({
@@ -83,9 +91,9 @@ gulp.task('bower-files', function () {
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
-gulp.task('app-js',function(){
-    return gulp.src(swdbConfig.src+"**/*.js")
-               .pipe(gulp.dest(swdbConfig.dest));
+gulp.task('app-js', function () {
+    return gulp.src(swdbConfig.src + "**/*.js")
+        .pipe(gulp.dest(swdbConfig.dest));
 });
 
 // inject bower components
@@ -95,17 +103,17 @@ gulp.task('wiredep', function () {
         ignorePath: ['../..']
     };
     var sources = gulp.src(
-        [swdbConfig.src+'**/*.js',swdbConfig.src+'**/*.css'],
+        [swdbConfig.src + '**/*.js', swdbConfig.src + '**/*.css'],
         { read: false }
-    );
+        );
 
     gulp.src(swdbConfig.src + "*.html")
         .pipe(wiredep(options))
-        .pipe(plugins.inject(sources,{ignorePath:swdbConfig.src}))
+        .pipe(plugins.inject(sources, { ignorePath: swdbConfig.src }))
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
-gulp.task('build-swdb', ['bower-files', 'wiredep','app-js'], function () {
+gulp.task('build-swdb', ['bower-files', 'wiredep', 'app-js','ts-files'], function () {
 
 });
 
