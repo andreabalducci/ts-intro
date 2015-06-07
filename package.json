@@ -17,9 +17,11 @@
   },
   "homepage": "https://github.com/andreabalducci/ts-intro",
   "dependencies": {
-    "express": "^4.12.3"
+    "express": "^4.12.3",
+    "vinyl-paths": "^1.0.0"
   },
   "devDependencies": {
+    "del": "^1.2.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-inject": "^1.2.0",
