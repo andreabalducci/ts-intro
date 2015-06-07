@@ -14,3 +14,6 @@ npm install -g gulp
 ##### TypeScript (http://www.typescriptlang.org)
 npm install -g typescript
 
+## Getting started
+npm install
+gulp run-hello
