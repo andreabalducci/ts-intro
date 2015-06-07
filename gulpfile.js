@@ -12,7 +12,7 @@ var tsProject = plugins.typescript.createProject({
 });
 
 var tsDemo = plugins.typescript.createProject({
-    target:'ES5',
+    target: 'ES5',
     declarationFiles: true,
     noExternalResolve: false,
     sortOutput: true,
@@ -75,14 +75,28 @@ var swdbConfig = {
     libs: 'build/swdb/app/libs/'
 };
 
-gulp.task('bower-files', function(){
-   return gulp  .src(mainBowerFiles())
-                .pipe(gulp.dest(swdbConfig.libs)); 
+gulp.task('bower-files', function () {
+    var bower = mainBowerFiles({
+    });
+
+    return gulp.src(bower, { base: "." })
+        .pipe(gulp.dest(swdbConfig.dest));
 });
 
-gulp.task('build-swdb', ['bower-files'], function(){
-    return gulp .src(swdbConfig.src+'/**/*.html')
-                .pipe(gulp.dest(swdbConfig.dest));
+// inject bower components
+gulp.task('wiredep', function () {
+    var wiredep = require('wiredep').stream;
+    var options = {
+        ignorePath: ['../..']
+    };
+
+    gulp.src(swdbConfig.src + "*.html")
+        .pipe(wiredep(options))
+        .pipe(gulp.dest(swdbConfig.dest));
+});
+
+gulp.task('build-swdb', ['bower-files', 'wiredep'], function () {
+
 });
 
 gulp.task('watch', ['scripts'], function () {
