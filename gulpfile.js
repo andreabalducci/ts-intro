@@ -83,19 +83,29 @@ gulp.task('bower-files', function () {
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
+gulp.task('app-js',function(){
+    return gulp.src(swdbConfig.src+"**/*.js")
+               .pipe(gulp.dest(swdbConfig.dest));
+});
+
 // inject bower components
 gulp.task('wiredep', function () {
     var wiredep = require('wiredep').stream;
     var options = {
         ignorePath: ['../..']
     };
+    var sources = gulp.src(
+        [swdbConfig.src+'**/*.js',swdbConfig.src+'**/*.css'],
+        { read: false }
+    );
 
     gulp.src(swdbConfig.src + "*.html")
         .pipe(wiredep(options))
+        .pipe(plugins.inject(sources,{ignorePath:swdbConfig.src}))
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
-gulp.task('build-swdb', ['bower-files', 'wiredep'], function () {
+gulp.task('build-swdb', ['bower-files', 'wiredep','app-js'], function () {
 
 });
 

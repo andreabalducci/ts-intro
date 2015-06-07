@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 
-app.use(express.static('./build/'));
+app.use(express.static('./build/swdb/'));
 
 app.get('/', function (req, res) {
   res.send('Hello World!');
