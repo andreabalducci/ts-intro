@@ -102,6 +102,12 @@ gulp.task('app-js', function () {
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
+gulp.task('app-templates', function () {
+    return gulp.src(swdbConfig.src + "**/*.html")
+        .pipe(gulp.dest(swdbConfig.dest));
+});
+
+
 // inject bower components
 gulp.task('wiredep',['ts-files'], function () {
     var wiredep = require('wiredep').stream;
@@ -128,7 +134,7 @@ gulp.task('wiredep',['ts-files'], function () {
         .pipe(gulp.dest(swdbConfig.dest));
 });
 
-gulp.task('build-swdb', ['bower-files', 'wiredep', 'app-js'], function () {
+gulp.task('build-swdb', ['bower-files', 'wiredep', 'app-js','app-templates'], function () {
 
 });
 

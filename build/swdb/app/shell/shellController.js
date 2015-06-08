@@ -2,10 +2,17 @@
 (function(){
 	'use strict';
 	
-	angular.module('swdb').controller('shellController', shellController);
+	angular.module('swdb')
+	.controller('shellController', shellController);
 	
 	
-	function shellController(){
-		this.title="Star Wars Database";
+	function shellController($http){
+		var vm = this;
+		vm.title="Star Wars Database";
+		vm.data = [];
+		
+		$http.get('/api/episodes').success(function(response){
+			vm.data = response;
+		});
 	}
 })();
