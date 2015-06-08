@@ -1,7 +1,11 @@
 (function(){
-	function episodesDetailController(){
+	function episodesDetailController($routeParams, $http){
 		var vm = this;
-		alert('detail');
+		vm.id = $routeParams.id;
+		
+		$http.get('/api/episode/' + vm.id).success(function(response){
+			vm.data = response;
+		});
 	};
 	
 	angular.module('swdb')
