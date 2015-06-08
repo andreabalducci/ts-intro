@@ -2,8 +2,6 @@
 
 module swdb
 {
-	'use strict';
-
 	var configure = ($routeProvider : ng.route.IRouteProvider) => {
 		$routeProvider
 			.when('/episodesList', {
@@ -21,4 +19,9 @@ module swdb
 
 	angular.module('swdb', ['ngRoute'])
 		.config(configure);
+		
+	export class Episode
+	{
+		id: string;
+	}
 }

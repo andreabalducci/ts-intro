@@ -1,4 +1,6 @@
 /// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../app.ts"/>
+/// <reference path="episodeService.ts"/>
 
 module swdb.controllers
 {
@@ -13,7 +15,9 @@ module swdb.controllers
 		list: Episode[];
 		open: (e:Episode) => void;
 
-		constructor(episodeService, $location : ng.ILocationService) {
+		constructor(
+			episodeService : swdb.services.IEpisodeService,
+			$location : ng.ILocationService) {
 
 			episodeService.getList((response: Episode[]) => {
 				this.list = response;
@@ -23,11 +27,6 @@ module swdb.controllers
 				$location.path('episode/' + e.id);
 			}
 		}
-	}
-
-	class Episode
-	{
-		id: string;
 	}
 
 	angular.module('swdb')
