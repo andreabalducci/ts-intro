@@ -1,11 +1,10 @@
-/// <reference path="../../../typings/angularjs/angular.d.ts"/>
-(function(){
+/// <reference path="../../../typings/tsd.d.ts"/>
+
+module swdb
+{
 	'use strict';
-	
-	angular.module('swdb', ['ngRoute'])
-	.config(configure);
-	
-	function configure($routeProvider) {
+
+	var configure = ($routeProvider : ng.route.IRouteProvider) => {
 		$routeProvider
 			.when('/episodesList', {
 				templateUrl: 'app/episodes/list.html',
@@ -19,4 +18,7 @@
 			})
 			.otherwise('/episodesList');
 	}
-})();
+
+	angular.module('swdb', ['ngRoute'])
+		.config(configure);
+}
