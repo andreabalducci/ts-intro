@@ -1,13 +1,14 @@
 (function(){
-	function episodesDetailController($routeParams, $http){
+
+	function episodesDetailController($routeParams, episodeService){
 		var vm = this;
 		vm.id = $routeParams.id;
-		
-		$http.get('/api/episode/' + vm.id).success(function(response){
+
+		episodeService.get(vm.id, function(response) {
 			vm.data = response;
 		});
 	};
-	
+
 	angular.module('swdb')
 		.controller('episodesDetailController', episodesDetailController);
 })();

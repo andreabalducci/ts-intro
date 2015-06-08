@@ -1,14 +1,14 @@
 (function(){
 
-	function episodesListController($http, $location){
+	function episodesListController(episodeService, $location){
 		var vm = this;
 		vm.title = 'Lista episodi';
 		vm.list = [];
-			
-		$http.get('/api/episodes').success(function(response){
+
+		episodeService.getList(function(response){
 			vm.list = response;
 		});
-		
+
 		vm.open = function(e){
 			$location.path('episode/' + e.id);
 		};

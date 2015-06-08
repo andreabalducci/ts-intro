@@ -8,8 +8,18 @@
 		<!-- endinject -->
 	</head>
 	<body>
-		<h1>{{shell.title}}</h1>
-		<div ng-view></div>
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#/episodesList">
+						{{shell.title}}
+					</a>
+				</div>
+			</div>
+		</nav>
+		<div class="container" style="margin-top: 50px;">
+			<div ng-view></div>
+		</div>
 		<!-- bower:js -->
 		<script src="/bower_components/jquery/dist/jquery.js"></script>
 		<script src="/bower_components/angularjs/angular.js"></script>
@@ -22,6 +32,8 @@
 		<!-- endinject -->
 		<!-- javascript:js -->
 		<script src="/app/app.js"></script>
+		<script src="/app/episodes/episodeDirective.js"></script>
+		<script src="/app/episodes/episodeService.js"></script>
 		<script src="/app/episodes/episodesDetailController.js"></script>
 		<script src="/app/episodes/episodesListController.js"></script>
 		<script src="/app/shell/shellController.js"></script>
