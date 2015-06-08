@@ -1,1 +1,12 @@
-<h2>List</h2>
+<h2>{{episodes.title}}</h2>
+<div class="row">
+	<div class="col-xs-4"  ng-repeat="e in episodes.list">
+		<a href="" class="thumbnail" ng-click="episodes.open(e)">
+			<img ng-src="{{e.thumb}}" alt="{{e.title}}">
+			<div class="caption">
+				<h3>{{e.title}}</h3>
+			</div>
+		</a>
+	</div>
+</div>
+<pre>{{episodes.list | json}}</pre>

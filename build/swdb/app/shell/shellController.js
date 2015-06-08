@@ -3,16 +3,12 @@
 	'use strict';
 	
 	angular.module('swdb')
-	.controller('shellController', shellController);
+		.controller('shellController', shellController);
 	
 	
 	function shellController($http){
 		var vm = this;
 		vm.title="Star Wars Database";
 		vm.data = [];
-		
-		$http.get('/api/episodes').success(function(response){
-			vm.data = response;
-		});
 	}
 })();
