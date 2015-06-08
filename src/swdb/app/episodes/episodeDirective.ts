@@ -1,6 +1,8 @@
-(function(){
-
-	function episodeDirective() {
+/// <reference path="../../../../typings/tsd.d.ts"/>
+/// <reference path="../app.ts" />
+module swdb.directives
+{
+	function episodeDirective() : ng.IDirective {
 		return {
 			replace: true,
 			restrict: 'E',
@@ -16,14 +18,21 @@
 				'		</div>' +
 				'	</a>' +
 				'</div>',
-			link: function(scope){
+			link: function(scope : IEpisodeDirective){
 				scope.open = function(e) {
 					scope.openCallback()(e);
 				};
 			}
 		};
 	};
-
+	
+	interface IEpisodeDirective extends ng.IScope
+	{
+		openCallback: () => (e : Episode) => void;
+		open : (e:Episode) => void;
+	}
+	
 	angular.module('swdb')
 		.directive('episode', episodeDirective);
-})();
+	
+}
