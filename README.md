@@ -17,4 +17,6 @@ npm install -g typescript
 ## Getting started
 npm install
 
+bower install
+
 gulp run-hello
